@@ -1,3 +1,15 @@
+import enum
+
+
+class Tiers(enum.Enum):
+    """
+    The tiers of the vertices
+    """
+    TIER1 = 1
+    TIER2 = 2
+    TIER3 = 3
+
+
 class Edge:
     def __init__(self, vertex1: 'Vertex', vertex2: 'Vertex', weight: int):
         """
@@ -9,8 +21,13 @@ class Edge:
         self.vertex2 = vertex2
         self.weight = weight
 
+
 class Vertex:
     edges: list[Edge] = []
+
+    def __init__(self, tier: Tiers):
+        self.tier = tier
+
 
 class Graph:
     def __init__(self):
@@ -30,12 +47,12 @@ class Graph:
         self.edges.append(edge)
         return edge
 
-    def add_vertex(self) -> Vertex:
+    def add_vertex(self, tier: Tiers) -> Vertex:
         """
         Add a vertex to the graph
         :return: The vertex that was added
         """
-        vertex = Vertex()
+        vertex = Vertex(tier)
         self.vertices.append(vertex)
         return vertex
 
@@ -48,7 +65,7 @@ class Graph:
         with open(path, 'r') as file:
             lines = file.readlines()
             for x in range(int(lines[0])):
-                self.add_vertex()
+                self.add_vertex(Tiers.TIER1)
             for line in lines[1:]:
                 vertex1, vertex2, weight = line.split()
                 vertex1 = int(vertex1)
@@ -66,7 +83,6 @@ class Graph:
             file.write(str(len(self.vertices)) + '\n')
             for edge in self.edges:
                 file.write(str(self.vertices.index(edge.vertex1)) + ' ' + str(self.vertices.index(edge.vertex2)) + ' ' + str(edge.weight) + '\n')
-
 
 
 graph = Graph()
