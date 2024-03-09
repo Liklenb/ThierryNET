@@ -1,4 +1,5 @@
 import enum
+from dijkstra import pch
 
 
 class Tiers(enum.Enum):
@@ -82,10 +83,14 @@ class Graph:
         with open(path, 'w') as file:
             file.write(str(len(self.vertices)) + '\n')
             for edge in self.edges:
-                file.write(str(self.vertices.index(edge.vertex1)) + ' ' + str(self.vertices.index(edge.vertex2)) + ' ' + str(edge.weight) + '\n')
+                file.write(
+                    str(self.vertices.index(edge.vertex1)) + ' ' + str(self.vertices.index(edge.vertex2)) + ' ' + str(
+                        edge.weight) + '\n')
 
 
 graph = Graph()
 graph.load_file('graph.thierry')
-print(graph.vertices)
-print(graph.edges)
+
+debut, fin = 0, 5
+cout, chemin = pch(graph, debut, fin)
+print(f'Le plus court chemin entre {debut} et {fin} est {chemin} avec un coût de {cout}')
