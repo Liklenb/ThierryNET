@@ -91,6 +91,5 @@ class Graph:
 graph = Graph()
 graph.load_file('graph.thierry')
 
-debut, fin = 0, 5
-cout, chemin = pch(graph, debut, fin)
-print(f'Le plus court chemin entre {debut} et {fin} est {chemin} avec un coût de {cout}')
+d = pch(graph, 0)
+print(d)
