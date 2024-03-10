@@ -13,24 +13,13 @@ def pch(graph, start: int, end: int) -> tuple[int, list[int]]:
     """
 
     # On crée un dictionnaire pour représenter le graphe
-    graphe = {}
+    graphe = {i: [] for i in range(len(graph.vertices))}
 
     # On parcourt les arêtes du graphe pour les ajouter au dictionnaire
     for edge in graph.edges:
-
-        # On récupère l'index des sommets de l'arête et le poids de l'arête
         vertex1_index = graph.vertices.index(edge.vertex1)
         vertex2_index = graph.vertices.index(edge.vertex2)
         weight = edge.weight
-
-        # Si le sommet n'est pas déjà dans le graphe, on l'ajoute
-        if vertex1_index not in graphe:
-            graphe[vertex1_index] = []
-
-        if vertex2_index not in graphe:
-            graphe[vertex2_index] = []
-
-        # On ajoute les sommets et le poids de l'arête au graphe
         graphe[vertex1_index].append((vertex2_index, weight))
         graphe[vertex2_index].append((vertex1_index, weight))
 
