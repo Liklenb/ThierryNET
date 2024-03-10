@@ -1,5 +1,5 @@
-import heapq
 from typing import Any
+from queue import Queue, QueueItem
 
 
 def pch(graph, start: int) -> dict[int, tuple[float, list[Any]]]:
@@ -12,23 +12,13 @@ def pch(graph, start: int) -> dict[int, tuple[float, list[Any]]]:
     :return: Le plus court chemin entre debut et fin.
     """
 
-    # On crée un dictionnaire pour représenter le graphe
-    graphe = {i: [] for i in range(len(graph.vertices))}
-
-    # On parcourt les arêtes du graphe pour les ajouter au dictionnaire
-    for edge in graph.edges:
-        vertex1_index = graph.vertices.index(edge.vertex1)
-        vertex2_index = graph.vertices.index(edge.vertex2)
-        weight = edge.weight
-        graphe[vertex1_index].append((vertex2_index, weight))
-        graphe[vertex2_index].append((vertex1_index, weight))
-
     # On initialise la file de priorité avec un tuple contenant le coût initial,
     # le sommet de départ et la liste du chemin initial (vide).
-    queue = [(0, start, [])]
+    queue = Queue()
+    queue.add(QueueItem((start, []), 0))
 
     # Un dictionnaire pour garder le coût et le chemin le plus court pour chaque sommet
-    distances = {vertex: (float('infinity'), []) for vertex in graphe}
+    distances = {vertex.identifier: (float('infinity'), []) for vertex in graph.vertices}
 
     # On met le coût du sommet de départ à 0 et le chemin à [start]
     distances[start] = (0, [start])
@@ -36,14 +26,16 @@ def pch(graph, start: int) -> dict[int, tuple[float, list[Any]]]:
     while queue:
 
         # On récupère et supprime le sommet avec le coût le plus bas de la file de priorité
-        cout, sommet, chemin = heapq.heappop(queue)
+        element = queue.pop()
+        cout = element.get_priority()
+        sommet, chemin = element.get_item()
 
-        for voisin, poids in graphe[sommet]:  # Pour chaque voisin du sommet actuel
-            nouveau_cout  = cout + poids  # On calcule le coût du chemin actuel + le poids de l'arête
-            if nouveau_cout < distances[voisin][0]:  # Si le nouveau coût est plus petit que le coût actuel
-                distances[voisin] = (nouveau_cout, chemin + [voisin])  # On met à jour le coût et le chemin
+        for neighbour in graph.vertices[sommet].get_neighbours():  # Pour chaque voisin du sommet actuel
+            nouveau_cout  = cout + neighbour.weight  # On calcule le coût du chemin actuel + le poids de l'arête
+            if nouveau_cout < distances[neighbour.vertex.identifier][0]:  # Si le nouveau coût est plus petit que le coût actuel
+                distances[neighbour.vertex.identifier] = (nouveau_cout, chemin + [neighbour.vertex.identifier])  # On met à jour le coût et le chemin
 
                 # On ajoute le voisin à la file de priorité avec le nouveau coût et le nouveau chemin
-                heapq.heappush(queue, (nouveau_cout, voisin, chemin + [voisin]))
+                queue.add(QueueItem((neighbour.vertex.identifier, chemin + [neighbour.vertex.identifier]), nouveau_cout))
 
     return distances
