@@ -22,11 +22,17 @@ class Edge:
         self.vertex2 = vertex2
         self.weight = weight
 
+    def __repr__(self):
+        return f"Edge({self.vertex1.identifier}, {self.vertex2.identifier}, w:{self.weight})"
+
 
 class Neighbour:
     def __init__(self, vertex: 'Vertex', weight: int):
         self.vertex = vertex
         self.weight = weight
+
+    def __repr__(self):
+        return f"Neighbour({self.vertex.identifier}, w:{self.weight})"
 
 
 class Vertex:
@@ -47,6 +53,9 @@ class Vertex:
             else:
                 neighbours.append(Neighbour(edge.vertex1, edge.weight))
         return neighbours
+
+    def __repr__(self):
+        return f"Vertex({self.identifier}, T{self.tier})"
 
 
 class Graph:
@@ -138,3 +147,6 @@ class Graph:
                 file.write(
                     str(self._vertices.index(edge.vertex1)) + ' ' + str(self._vertices.index(edge.vertex2)) + ' ' + str(
                         edge.weight) + '\n')
+
+    def __repr__(self):
+        return f"Graph({len(self._vertices)} vertices, {len(self._edges)} edges)"
