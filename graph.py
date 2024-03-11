@@ -51,8 +51,38 @@ class Vertex:
 
 class Graph:
     def __init__(self):
-        self.vertices: list[Vertex] = []
-        self.edges: list[Edge] = []
+        self._vertices: list[Vertex] = []
+        self._edges: list[Edge] = []
+
+    def get_vertex(self, identifier: int) -> Vertex:
+        """
+        Get a vertex by its identifier
+        :param identifier: The identifier of the vertex
+        :return: The vertex
+        """
+        return self._vertices[identifier]
+
+    def get_edge(self, identifier: int) -> Edge:
+        """
+        Get an edge by its identifier
+        :param identifier: The identifier of the edge
+        :return: The edge
+        """
+        return self._edges[identifier]
+
+    def get_vertices(self) -> list[Vertex]:
+        """
+        Get a copy of the vertices of the graph
+        :return: The vertices of the graph
+        """
+        return self._vertices.copy()
+
+    def get_edges(self) -> list[Edge]:
+        """
+        Get a copy of the edges of the graph
+        :return: The edges of the graph
+        """
+        return self._edges.copy()
 
     def add_edge(self, vertex1: Vertex, vertex2: Vertex, weight: int) -> Edge:
         """
@@ -61,10 +91,10 @@ class Graph:
         :param weight: The weight of the edge
         :return: The edge that was added
         """
-        edge = Edge(len(self.edges), vertex1, vertex2, weight)
+        edge = Edge(len(self._edges), vertex1, vertex2, weight)
         vertex1.edges.append(edge)
         vertex2.edges.append(edge)
-        self.edges.append(edge)
+        self._edges.append(edge)
         return edge
 
     def add_vertex(self, tier: Tiers) -> Vertex:
@@ -72,8 +102,8 @@ class Graph:
         Add a vertex to the graph
         :return: The vertex that was added
         """
-        vertex = Vertex(len(self.vertices), tier)
-        self.vertices.append(vertex)
+        vertex = Vertex(len(self._vertices), tier)
+        self._vertices.append(vertex)
         return vertex
 
     @staticmethod
@@ -93,7 +123,7 @@ class Graph:
                 vertex1 = int(vertex1)
                 vertex2 = int(vertex2)
                 weight = int(weight)
-                graph.add_edge(graph.vertices[vertex1], graph.vertices[vertex2], weight)
+                graph.add_edge(graph._vertices[vertex1], graph._vertices[vertex2], weight)
         return graph
 
     def save_to_file(self, path):
@@ -103,8 +133,8 @@ class Graph:
         :return: None
         """
         with open(path, 'w') as file:
-            file.write(str(len(self.vertices)) + '\n')
-            for edge in self.edges:
+            file.write(str(len(self._vertices)) + '\n')
+            for edge in self._edges:
                 file.write(
-                    str(self.vertices.index(edge.vertex1)) + ' ' + str(self.vertices.index(edge.vertex2)) + ' ' + str(
+                    str(self._vertices.index(edge.vertex1)) + ' ' + str(self._vertices.index(edge.vertex2)) + ' ' + str(
                         edge.weight) + '\n')

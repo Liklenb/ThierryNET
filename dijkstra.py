@@ -1,8 +1,9 @@
 from typing import Any
 from queue import Queue, QueueItem
+from graph import Graph
 
 
-def pch(graph, start: int) -> dict[int, tuple[float, list[Any]]]:
+def pch(graph: Graph, start: int) -> dict[int, tuple[float, list[Any]]]:
     """
     Retourne le plus court chemin entre debut et fin dans le graphe.
     :param graph: Un objet contenant le graphe.
@@ -16,7 +17,7 @@ def pch(graph, start: int) -> dict[int, tuple[float, list[Any]]]:
     queue.add(QueueItem((start, []), 0))
 
     # Un dictionnaire pour garder le coût et le chemin le plus court pour chaque sommet
-    distances = {vertex.identifier: (float('infinity'), []) for vertex in graph.vertices}
+    distances = {vertex.identifier: (float('infinity'), []) for vertex in graph.get_vertices()}
 
     # On met le coût du sommet de départ à 0 et le chemin à [start]
     distances[start] = (0, [start])
@@ -37,7 +38,7 @@ def pch(graph, start: int) -> dict[int, tuple[float, list[Any]]]:
         # On ajoute le sommet actuel à la liste des sommets visités
         visited.add(sommet)
 
-        for neighbour in graph.vertices[sommet].get_neighbours():  # Pour chaque voisin du sommet actuel
+        for neighbour in graph.get_vertex(sommet).get_neighbours():  # Pour chaque voisin du sommet actuel
             nouveau_cout = cout + neighbour.weight  # On calcule le coût du chemin actuel + le poids de l'arête
 
             # Si le nouveau coût est plus petit que le coût actuel
