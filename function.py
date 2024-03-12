@@ -19,7 +19,7 @@ for i in range(21, 101):
 
 # création des arêtes
 
-aretes = {'tiers1_tiers1': [], 'tiers1_tiers2': [], 'tiers2_tiers2': []}
+aretes = {'tiers1_tiers1': [], 'tiers1_tiers2': [], 'tiers2_tiers2': [], 'tiers2_tiers3': []}
 
 # création des arêtes entre les tiers 1
 for backbone1 in list_backbone:
@@ -28,3 +28,57 @@ for backbone1 in list_backbone:
             x = random.randint(1, 4)
             if x != 4:
                 aretes['tiers1_tiers1'].append(graphique.add_edge(backbone1, backbone2, random.randint(5, 10)))
+
+# creation des arêtes entre les tiers 2
+possible = list_tiers2.copy()
+test = True
+while test:
+    tiers2_1 = random.choice(possible)
+    while len(tiers2_1.get_neighbours()) >= 3:
+        tiers2_1 = random.choice(possible)
+        # print(tiers2_1.get_neighbours())
+    tiers2_2 = random.choice(possible)
+    while len(tiers2_2.get_neighbours()) >= 3 or tiers2_2 == tiers2_1 or tiers2_2 in (
+            lambda lst: [voisin.vertex.identifier for voisin in lst])(tiers2_1.get_neighbours()) or len(
+        tiers2_1.get_neighbours()) >= 3:
+        tiers2_1 = random.choice(possible)
+        tiers2_2 = random.choice(possible)
+    aretes['tiers2_tiers2'].append(graphique.add_edge(tiers2_1, tiers2_2, random.randint(10, 20)))
+    test = False
+    test_priority = False
+    for tiers2 in list_tiers2:
+        if len(tiers2.get_neighbours()) < 2:
+            test = True
+        if len(tiers2.get_neighbours()) >= 3 and tiers2 in possible:
+            possible.remove(tiers2)
+            test_priority = True
+        if test_priority:
+            priority = []
+            for tiers2_possible in possible:
+                if len(tiers2_possible.get_neighbours()) < 2:
+                    priority.append(tiers2_possible)
+                if len(priority) == 2:
+                    aretes['tiers2_tiers2'].append(graphique.add_edge(priority[0], priority[1], random.randint(10, 20)))
+                elif len(priority) == 1:
+                    aretes['tiers2_tiers2'].append(
+                        graphique.add_edge(priority[0], random.choice(possible), random.randint(10, 20)))
+        if len(possible) == 1 and len(possible[0].get_neighbours()) < 2:
+            print('ah')
+# création des arêtes entre les tiers 1 et les tiers 2
+for tiers2 in list_tiers2:
+    for _ in range(random.randint(1, 2)):
+        tiers1 = random.choice(list_backbone)
+        while tiers1 in (lambda lst: [voisin.vertex.identifier for voisin in lst])(tiers2.get_neighbours()):
+            tiers1 = random.choice(list_backbone)
+        aretes['tiers1_tiers2'].append(graphique.add_edge(tiers1, tiers2, random.randint(10, 20)))
+
+# création des arêtes entre les tiers 2 et les tiers 3
+for tiers3 in list_tiers3:
+    for _ in range(2):
+        tiers2 = random.choice(list_tiers2)
+        while tiers2 in (lambda lst: [voisin.vertex.identifier for voisin in lst])(tiers3.get_neighbours()):
+            tiers2 = random.choice(list_tiers2)
+        aretes['tiers2_tiers3'].append(graphique.add_edge(tiers2, tiers3, random.randint(20, 50)))
+
+for key in aretes:
+    print(key, aretes[key])
