@@ -1,5 +1,9 @@
 import graph
 import random
+import networkx as nx
+import matplotlib.pyplot as plt
+from math import cos, sin
+from graph_algorithms.dfs import parcours_profondeur_rec
 
 graphique = graph.Graph()  # création du graphique
 
@@ -80,5 +84,41 @@ for tiers3 in list_tiers3:
             tiers2 = random.choice(list_tiers2)
         aretes['tiers2_tiers3'].append(graphique.add_edge(tiers2, tiers3, random.randint(20, 50)))
 
-for key in aretes:
-    print(key, aretes[key])
+print(aretes)
+print(parcours_profondeur_rec(graphique))
+G = nx.Graph()
+
+sommets = list_backbone + list_tiers2 + list_tiers3
+
+# Ajout des sommets
+for sommet in sommets:
+    G.add_node(sommet.identifier, tier=sommet.tier)
+
+# Ajout des arêtes
+for key, edges in aretes.items():
+    for edge in edges:
+        G.add_edge(edge.vertex1.identifier, edge.vertex2.identifier, weight=edge.weight)
+
+# Organiser les nœuds en fonction de leur tier
+pos = {}
+tiers = set([v.tier for v in sommets])
+max_radius = len(tiers)
+current_radius = 0
+for tier in tiers:
+    tier_nodes = [v.identifier for v in sommets if v.tier == tier]
+    num_nodes = len(tier_nodes)
+    angle = 2 * 3.1416 / num_nodes
+    for i, node in enumerate(tier_nodes):
+        angle_rad = i * angle
+        radius = current_radius * 0.3
+        x = radius * random.uniform(0.9, 1.1) * cos(angle_rad)
+        y = radius * random.uniform(0.9, 1.1) * sin(angle_rad)
+        pos[node] = (x, y)
+    current_radius += 1
+
+# Visualisation du graphe
+plt.figure(figsize=(50, 50))  # Taille de la figure
+nx.draw(G, pos, with_labels=True, node_size=1000, node_color='skyblue', font_size=12, font_weight='bold')
+nx.draw_networkx_edges(G, pos, width=1.0, alpha=0.5)
+plt.title("Graphe")
+plt.show()
