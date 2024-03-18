@@ -1,5 +1,4 @@
-from pathfinding import pch
-from creation_graph import create_graph
+from graph_algorithms.pathfinding import pch
 import pandas as pd
 
 
@@ -34,11 +33,6 @@ def creer_table_routage(graphique):
                 data[depart][arrivee] = None
 
     # Création du DataFrame à partir du dictionnaire
-
-
     df = pd.DataFrame(data)
     print(df)
     return df
-
-g = create_graph()
-creer_table_routage(g)

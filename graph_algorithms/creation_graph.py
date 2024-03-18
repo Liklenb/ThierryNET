@@ -1,14 +1,8 @@
-from ProjetIN403 import graph
+import graph
 import random
-"""import networkx as nx
-import matplotlib.pyplot as plt"""
-from math import cos, sin
-from dfs import parcours_profondeur_rec
-from pathfinding import pch
 
 
 def create_graph():
-
     graphique = graph.Graph()  # création du graphique
 
     # création des 100 nœuds de la table de routage
@@ -46,9 +40,10 @@ def create_graph():
             tiers2_1 = random.choice(possible)
             # print(tiers2_1.get_neighbours())
         tiers2_2 = random.choice(possible)
-        while len(tiers2_2.get_neighbours()) >= 3 or tiers2_2 == tiers2_1 or tiers2_2 in (
-                lambda lst: [voisin.vertex.identifier for voisin in lst])(tiers2_1.get_neighbours()) or len(
-            tiers2_1.get_neighbours()) >= 3:
+        while (len(tiers2_2.get_neighbours()) >= 3 or
+               tiers2_2 == tiers2_1 or tiers2_2 in
+               (lambda lst: [voisin.vertex.identifier for voisin in lst])(tiers2_1.get_neighbours()) or
+               len(tiers2_1.get_neighbours()) >= 3):
             tiers2_1 = random.choice(possible)
             tiers2_2 = random.choice(possible)
         aretes['tiers2_tiers2'].append(graphique.add_edge(tiers2_1, tiers2_2, random.randint(10, 20)))
@@ -66,7 +61,8 @@ def create_graph():
                     if len(tiers2_possible.get_neighbours()) < 2:
                         priority.append(tiers2_possible)
                     if len(priority) == 2:
-                        aretes['tiers2_tiers2'].append(graphique.add_edge(priority[0], priority[1], random.randint(10, 20)))
+                        aretes['tiers2_tiers2'].append(graphique.add_edge(priority[0], priority[1],
+                                                                          random.randint(10, 20)))
                     elif len(priority) == 1:
                         aretes['tiers2_tiers2'].append(
                             graphique.add_edge(priority[0], random.choice(possible), random.randint(10, 20)))
@@ -88,44 +84,3 @@ def create_graph():
                 tiers2 = random.choice(list_tiers2)
             aretes['tiers2_tiers3'].append(graphique.add_edge(tiers2, tiers3, random.randint(20, 50)))
     return graphique
-
-
-g = create_graph()
-
-"""G = nx.Graph()
-
-sommets = list_backbone + list_tiers2 + list_tiers3
-
-# Ajout des sommets
-for sommet in sommets:
-    G.add_node(sommet.identifier, tier=sommet.tier)
-
-# Ajout des arêtes
-for key, edges in aretes.items():
-    for edge in edges:
-        G.add_edge(edge.vertex1.identifier, edge.vertex2.identifier, weight=edge.weight)
-
-# Organiser les nœuds en fonction de leur tier
-pos = {}
-tiers = set([v.tier for v in sommets])
-max_radius = len(tiers)
-current_radius = 0
-for tier in tiers:
-    tier_nodes = [v.identifier for v in sommets if v.tier == tier]
-    num_nodes = len(tier_nodes)
-    angle = 2 * 3.1416 / num_nodes
-    for i, node in enumerate(tier_nodes):
-        angle_rad = i * angle
-        radius = current_radius * 0.3
-        x = radius * random.uniform(0.9, 1.1) * cos(angle_rad)
-        y = radius * random.uniform(0.9, 1.1) * sin(angle_rad)
-        pos[node] = (x, y)
-    current_radius += 1
-
-# Visualisation du graphe
-plt.figure(figsize=(50, 50))  # Taille de la figure
-nx.draw(G, pos, with_labels=True, node_size=1000, node_color='skyblue', font_size=12, font_weight='bold')
-nx.draw_networkx_edges(G, pos, width=1.0, alpha=0.5)
-plt.title("Graphe")
-plt.show()
-"""
