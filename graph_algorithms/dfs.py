@@ -1,4 +1,4 @@
-from graph import Graph
+from ProjetIN403.graph import Graph
 
 
 def explorer_sommet(graph: Graph, sommet: int, sommets_visites: set[int]):

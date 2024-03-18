@@ -1,6 +1,6 @@
 from typing import Any
-from priorityqueue import Queue, QueueItem
-from graph import Graph
+from ProjetIN403.priorityqueue import Queue, QueueItem
+from ProjetIN403.graph import Graph
 
 
 def pch(graph: Graph, start: int) -> dict[int, tuple[float, list[Any]]]:

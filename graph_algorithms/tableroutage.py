@@ -1,5 +1,5 @@
-from graph_algorithms.pathfinding import pch
-from function import create_graph
+from pathfinding import pch
+from creation_graph import create_graph
 import pandas as pd
 
 

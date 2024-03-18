@@ -1,10 +1,10 @@
-import graph
+from ProjetIN403 import graph
 import random
-import networkx as nx
-import matplotlib.pyplot as plt
+"""import networkx as nx
+import matplotlib.pyplot as plt"""
 from math import cos, sin
-from graph_algorithms.dfs import parcours_profondeur_rec
-from graph_algorithms.pathfinding import pch
+from dfs import parcours_profondeur_rec
+from pathfinding import pch
 
 
 def create_graph():
@@ -92,7 +92,6 @@ def create_graph():
 
 g = create_graph()
 
-print(pch(g, 0))
 """G = nx.Graph()
 
 sommets = list_backbone + list_tiers2 + list_tiers3
