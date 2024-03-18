@@ -1,5 +1,5 @@
 from typing import Any
-from queue import Queue, QueueItem
+from priorityqueue import Queue, QueueItem
 from graph import Graph
 
 
