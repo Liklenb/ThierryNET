@@ -1,38 +1,45 @@
 from graph_algorithms.pathfinding import pch
-import pandas as pd
+from graph import Graph
 
 
-def creer_table_routage(graphique):
-    routing_table = []
+def creer_table_routage(graph: Graph) -> dict[int, dict[int, float]]:
+    """
+    Création d'une table de routage pour un graphe donné en utilisant l'algorithme de Dijkstra. La table de routage
+    stocke pour chaque sommet du graphe, le voisin à travers lequel on peut atteindre chaque sommet de destination.
 
-    # Parcourir le graphe et extraire les chemins
-    for start_node in range(100):
-        paths = pch(graphique, start_node)  # Suppose que pch retourne un dictionnaire de chemins pour un sommet donné
-        for end_node, (weight, path) in paths.items():
-            routing_table.append([start_node, end_node, path[0]])
-    # Obtenir tous les points de départ et d'arrivée possibles
-    points_de_depart = set(x[0] for x in routing_table)
-    points_d_arrivee = set(x[1] for x in routing_table)
+    :param graph: Le graphe pour lequel on veut créer une table de routage
+    :return: Un dictionnaire qui contient pour chaque sommet du graphe, le voisin à travers lequel on peut atteindre
+    chaque sommet de destination.
+    """
 
-    # Création d'un dictionnaire pour stocker les prochains points à rejoindre
-    data = {}
-    for depart in points_de_depart:
-        data[depart] = {}
-        for arrivee in points_d_arrivee:
-            # Recherche de la sous-liste correspondante
-            sous_liste_trouvee = None
-            for sous_liste in routing_table:
-                if sous_liste[0] == depart and sous_liste[1] == arrivee:
-                    sous_liste_trouvee = sous_liste
-                    break
-            if sous_liste_trouvee is not None:
-                # Le prochain point est le troisième élément de la sous-liste
-                data[depart][arrivee] = sous_liste_trouvee[2]
-            else:
-                # Si aucune sous-liste correspondante n'est trouvée, le prochain point est None
-                data[depart][arrivee] = None
+    # On initialise un dictionnaire pour stocker les informations de routage pour chaque sommet du graphe
+    table_routage = {}
 
-    # Création du DataFrame à partir du dictionnaire
-    df = pd.DataFrame(data)
-    print(df)
-    return df
+    for vertex in graph.get_vertices():
+        # On applique l'algorithme de Dijkstra pour trouver les distances
+        distances = pch(graph, vertex.identifier)
+
+        # On stocke les informations de routage pour le sommet courant
+        table_routage[vertex.identifier] = {neighbour: path[0] for neighbour, (_, path) in distances.items()}
+
+    return table_routage
+
+
+"""
+    table_routage = []
+
+    for vertex in graph.get_vertices():
+        distances = pch(graph, vertex.identifier)
+        
+        routage_sommet = [None] * len(graph.get_vertices())
+        
+        for dest, (_, path) in distances.items():
+            if len(path) > 1:
+                routage_sommet[dest] = path[1]  # path[1] est le sommet suivant dans le chemin
+            elif len(path) == 1:
+                routage_sommet[dest] = path[0]  # cas où le sommet de départ et d'arrivée sont les mêmes
+
+        table_routage.append(routage_sommet)
+
+    return table_routage
+"""

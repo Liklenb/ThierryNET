@@ -1,12 +1,11 @@
 from graph_algorithms.dfs import parcours_profondeur_rec
 from graph_algorithms.creation_graph import create_graph
-from graph_algorithms import tableroutage
-
+from graph_algorithms.tableroutage import creer_table_routage
 
 if __name__ == '__main__':
     graphe = create_graph()
     while not parcours_profondeur_rec(graphe):
-        print('problemes...')
         graphe = create_graph()
-    print('okay')
-    table_routage = tableroutage.creer_table_routage(graphe)
+
+    table_routage = creer_table_routage(graphe)
+    print(table_routage)
