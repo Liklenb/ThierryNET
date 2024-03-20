@@ -20,7 +20,7 @@ def pch(graph: Graph, start: int) -> dict[int, tuple[float, list[Any]]]:
     distances = {vertex.identifier: (float('infinity'), []) for vertex in graph.get_vertices()}
 
     # On met le coût du sommet de départ à 0 et le chemin à [start]
-    distances[start] = (0, [start])
+    distances[start] = (0, [None])
 
     visited = set()  # On initialise un ensemble pour garder les sommets visités
 
