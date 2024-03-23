@@ -79,7 +79,7 @@ class FletInterface:
         """Crée un détecteur de geste pour un élément avec une couleur spécifiée."""
         return ft.GestureDetector(
             mouse_cursor=ft.MouseCursor.MOVE,
-            drag_interval=1,
+            drag_interval=10,
             on_vertical_drag_update=self._on_pan_update,
             on_tap=self._on_tap,
             left=x,
@@ -115,7 +115,7 @@ class FletInterface:
         self._update_edges(int(e.control.content.content.value), e.control.left + 25, e.control.top + 25)
         self.cp.update()
 
-    def _update_ed(self, src, x, y):
+    def _update_edges(self, src, x, y):
         """Met à jour les arêtes connectées à un sommet donné."""
         for edge in self.cp.shapes:
             if edge.data[0] == src:
@@ -161,9 +161,8 @@ class FletInterface:
             x = self.current_path[0]
             while x != self.current_path[1]:
                 if x not in self.current_path:
-                    print(x)
-                    print(self.stack.controls[x])
                     self.stack.controls[x].content.border = ft.border.all(5, color=ft.colors.PURPLE_200)
+                    self.colored_vertices.append(self.stack.controls[x].control.content)
                 result = (x, None)
                 x = self.table_routage[x][self.current_path[1]]
                 result = (result[0], x)
