@@ -32,6 +32,8 @@ class FletInterface:
         self.colored_vertices = []
         self._configure_page()
         self._create_minimal_ui()
+        self.page.update()
+        self.graph_saved = []
 
     def _configure_page(self):
         """Configure les propriétés de la page."""
@@ -42,30 +44,30 @@ class FletInterface:
 
     def _create_minimal_ui(self):
         """Crée une interface utilisateur lorsque la fenêtre n'est pas maximisée."""
-        self.page.add(ft.Row([ft.Text("L'application ne fonctionne que si la fenêtre est maximisée.")],
-                             alignment=ft.MainAxisAlignment.CENTER))
-        self.page.update()
+        self.page.controls = [ft.Row([
+            ft.Text("L'application ne fonctionne que si la fenêtre est maximisée.")],
+            alignment=ft.MainAxisAlignment.CENTER)
+        ]
 
     def _create_maximal_ui(self):
         """Crée l'interface utilisateur principale avec les sommets et les arêtes quand la fenêtre est maximisée."""
+
         self.stack = ft.Stack(width=self.page.width,
                               height=self.page.height)
-
-        for elt in self.graph.get_vertices():
-            color = _get_color(elt)
-            x, y = self._get_random_position()
-            gesture = self._create_gesture_detector(elt, color, x, y)
-            self.existing_positions.append((x, y))
-            self.stack.controls.append(gesture)
 
         self.cp = cv.Canvas(content=self.stack,
                             width=self.page.width + self.page.window_left,
                             height=self.page.height + self.page.window_top)
 
+        for elt in self.graph.get_vertices():
+            self._add_vertex(elt)
+
+        del self.existing_positions
+
         for elt in self.graph.get_edges():
             self._add_edge(elt.vertex1.identifier, elt.vertex2.identifier)
 
-        self.page.add(self.cp)
+        self.page.controls = [self.cp]
 
     def _get_random_position(self):
         """Génère une position aléatoire valide pour un sommet."""
@@ -90,19 +92,23 @@ class FletInterface:
                 height=50,
                 border_radius=20,
                 content=ft.Text(str(elt.identifier + 1)),
-                alignment=ft.Alignment(0, 0),
-                border=ft.border.all(0, color=ft.colors.BLACK)
+                alignment=ft.Alignment(0, 0)
             )
         )
 
     def _page_resize(self, e):
         """Gère l'événement de redimensionnement de la page."""
-        e.control.controls.pop(0) if len(e.control.controls) > 0 else None
-
         if not e.control.window_maximized:
             self._create_minimal_ui()
+            if not self.graph_saved:
+                self.graph_saved = self.cp
         else:
-            self._create_maximal_ui()
+            if self.graph_saved:
+                self.page.controls = [self.graph_saved]
+            else:
+                self._create_maximal_ui()
+
+        self.page.update()
 
     def _on_pan_update(self, e: ft.DragUpdateEvent):
         """Gère la mise à jour de la position du détecteur de geste pendant le déplacement."""
@@ -114,6 +120,13 @@ class FletInterface:
 
         self._update_edges(int(e.control.content.content.value), e.control.left + 25, e.control.top + 25)
         self.cp.update()
+
+    def _add_vertex(self, elt):
+        """Ajoute un sommet à l'interface utilisateur."""
+        color = _get_color(elt)
+        x, y = self._get_random_position()
+        self.stack.controls.append(self._create_gesture_detector(elt, color, x, y))
+        self.existing_positions.append((x, y))
 
     def _update_edges(self, src, x, y):
         """Met à jour les arêtes connectées à un sommet donné."""
@@ -140,24 +153,22 @@ class FletInterface:
         """Gère l'événement de tap sur un sommet."""
         if len(self.colored_vertices) >= 2:
             for vertex in self.colored_vertices:
-                vertex.border = ft.border.all(0, color=ft.colors.BLACK)
+                vertex.border = ft.border.all(0)
                 vertex.update()
             self.colored_vertices = []
-        if self.current_path[0] is None:
+
             for edge in self.cp.shapes:
                 edge.paint = ft.Paint(color=ft.colors.WHITE, stroke_width=1)
 
-            self.cp.update()
+        if self.current_path[0] is None:
             self.current_path = (int(e.control.content.content.value) - 1, None)
             e.control.content.border = ft.border.all(5, color=ft.colors.BLUE_200)
             self.colored_vertices.append(e.control.content)
-            e.control.content.update()
 
         elif self.current_path[1] is None:
             self.current_path = (self.current_path[0], int(e.control.content.content.value) - 1)
             e.control.content.border = ft.border.all(5, color=ft.colors.PINK_200)
             self.colored_vertices.append(e.control.content)
-            e.control.content.update()
             x = self.current_path[0]
             while x != self.current_path[1]:
                 if x not in self.current_path:
@@ -175,6 +186,7 @@ class FletInterface:
                         edge.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
                         break
 
-            self.cp.update()
             self.current_path = (None, None)
             self.path = []
+
+        self.cp.update()
