@@ -29,6 +29,7 @@ class FletInterface:
         self.existing_positions = []
         self.path = []
         self.current_path = (None, None)
+        self.colored_vertices = []
         self._configure_page()
         self._create_minimal_ui()
 
@@ -78,7 +79,7 @@ class FletInterface:
         """Crée un détecteur de geste pour un élément avec une couleur spécifiée."""
         return ft.GestureDetector(
             mouse_cursor=ft.MouseCursor.MOVE,
-            drag_interval=10,
+            drag_interval=1,
             on_vertical_drag_update=self._on_pan_update,
             on_tap=self._on_tap,
             left=x,
@@ -89,7 +90,8 @@ class FletInterface:
                 height=50,
                 border_radius=20,
                 content=ft.Text(str(elt.identifier + 1)),
-                alignment=ft.Alignment(0, 0)
+                alignment=ft.Alignment(0, 0),
+                border=ft.border.all(0, color=ft.colors.BLACK)
             )
         )
 
@@ -113,7 +115,7 @@ class FletInterface:
         self._update_edges(int(e.control.content.content.value), e.control.left + 25, e.control.top + 25)
         self.cp.update()
 
-    def _update_edges(self, src, x, y):
+    def _update_ed(self, src, x, y):
         """Met à jour les arêtes connectées à un sommet donné."""
         for edge in self.cp.shapes:
             if edge.data[0] == src:
@@ -136,14 +138,30 @@ class FletInterface:
 
     def _on_tap(self, e: ft.TapEvent):
         """Gère l'événement de tap sur un sommet."""
+        if len(self.colored_vertices) >= 2:
+            for vertex in self.colored_vertices:
+                vertex.border = ft.border.all(0, color=ft.colors.BLACK)
+                vertex.update()
+            self.colored_vertices = []
         if self.current_path[0] is None:
+            for edge in self.cp.shapes:
+                edge.paint = ft.Paint(color=ft.colors.WHITE, stroke_width=1)
+
+            self.cp.update()
             self.current_path = (int(e.control.content.content.value) - 1, None)
+            e.control.content.border = ft.border.all(5, color=ft.colors.BLUE_200)
+            self.colored_vertices.append(e.control.content)
+            e.control.content.update()
 
         elif self.current_path[1] is None:
             self.current_path = (self.current_path[0], int(e.control.content.content.value) - 1)
-
+            e.control.content.border = ft.border.all(5, color=ft.colors.PINK_200)
+            self.colored_vertices.append(e.control.content)
+            e.control.content.update()
             x = self.current_path[0]
             while x != self.current_path[1]:
+                if x not in self.current_path:
+                    print(x)
                 result = (x, None)
                 x = self.table_routage[x][self.current_path[1]]
                 result = (result[0], x)
@@ -157,12 +175,5 @@ class FletInterface:
                         break
 
             self.cp.update()
-
-        else:
-            for edge in self.cp.shapes:
-                edge.paint = ft.Paint(color=ft.colors.WHITE, stroke_width=1)
-
-            self.cp.update()
-
-            self.current_path = (int(e.control.content.content.value) - 1, None)
+            self.current_path = (None, None)
             self.path = []
