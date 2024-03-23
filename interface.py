@@ -13,7 +13,7 @@ def _get_color(elt):
 
 
 def _is_position_valid(x, y, existing_positions):
-    """Vérifie si la nouvelle position est valide en considérant la distance minimale."""
+    """Vérifie si la nouvelle position est valide en considérant la distance minimale. """
     for pos_x, pos_y in existing_positions:
         if abs(x - pos_x) < 60 and abs(y - pos_y) < 60:
             return False
