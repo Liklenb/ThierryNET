@@ -27,9 +27,9 @@ class FletInterface:
         self.graph = graph
         self.table_routage = table_routage
         self.existing_positions = []
-        self.path = []
         self.current_path = (None, None)
         self.colored_vertices = []
+        self.colored_edges = []
         self._configure_page()
         self._create_minimal_ui()
         self.page.update()
@@ -151,42 +151,53 @@ class FletInterface:
 
     def _on_tap(self, e: ft.TapEvent):
         """Gère l'événement de tap sur un sommet."""
-        if len(self.colored_vertices) >= 2:
-            for vertex in self.colored_vertices:
-                vertex.border = ft.border.all(0)
-                vertex.update()
-            self.colored_vertices = []
+        current_vertex_id = int(e.control.content.content.value) - 1
 
-            for edge in self.cp.shapes:
-                edge.paint = ft.Paint(color=ft.colors.WHITE, stroke_width=1)
+        if len(self.colored_vertices) >= 2:
+            self._reset_ui()
 
         if self.current_path[0] is None:
-            self.current_path = (int(e.control.content.content.value) - 1, None)
-            e.control.content.border = ft.border.all(5, color=ft.colors.BLUE_200)
-            self.colored_vertices.append(e.control.content)
-
+            self.current_path = (current_vertex_id, None)
+            self._highlight_vertex(e.control.content, ft.colors.BLUE_200)
         elif self.current_path[1] is None:
-            self.current_path = (self.current_path[0], int(e.control.content.content.value) - 1)
-            e.control.content.border = ft.border.all(5, color=ft.colors.PINK_200)
-            self.colored_vertices.append(e.control.content)
-            x = self.current_path[0]
-            while x != self.current_path[1]:
-                if x not in self.current_path:
-                    self.stack.controls[x].content.border = ft.border.all(5, color=ft.colors.PURPLE_200)
-                    self.colored_vertices.append(self.stack.controls[x].content)
-                result = (x, None)
-                x = self.table_routage[x][self.current_path[1]]
-                result = (result[0], x)
-                self.path.append(result)
-
-            for x, y in self.path:
-                for edge in self.cp.shapes:
-                    if ((edge.data[0] == x + 1 and edge.data[1] == y + 1) or
-                            (edge.data[0] == y + 1 and edge.data[1] == x + 1)):
-                        edge.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
-                        break
-
-            self.current_path = (None, None)
-            self.path = []
+            self.current_path = (self.current_path[0], current_vertex_id)
+            self._highlight_vertex(e.control.content, ft.colors.PINK_200)
+            self._highlight_path()
 
         self.cp.update()
+
+    def _reset_ui(self):
+        """Réinitialise l'UI en effaçant les sélections et en remettant les arêtes à leur état initial."""
+        for vertex in self.colored_vertices:
+            vertex.border = ft.border.all(0)
+        self.colored_vertices = []
+
+        for edge in self.cp.shapes:
+            edge.paint = ft.Paint(color=ft.colors.WHITE, stroke_width=1)
+
+        self.current_path = (None, None)
+        self.colored_edges = []
+
+    def _highlight_vertex(self, vertex, color):
+        """Met en évidence un sommet sélectionné."""
+        vertex.border = ft.border.all(5, color=color)
+        self.colored_vertices.append(vertex)
+
+    def _highlight_path(self):
+        """Trouve et met en évidence le chemin entre deux sommets sélectionnés."""
+        x = self.current_path[0]
+        while x != self.current_path[1]:
+            if x not in self.current_path:
+                self.stack.controls[x].content.border = ft.border.all(5, color=ft.colors.PURPLE_200)
+                self.colored_vertices.append(self.stack.controls[x].content)
+            result = (x, None)
+            x = self.table_routage[x][self.current_path[1]]
+            result = (result[0], x)
+            self.colored_edges.append(result)
+
+        for x, y in self.colored_edges:
+            for edge in self.cp.shapes:
+                if ((edge.data[0] == x + 1 and edge.data[1] == y + 1) or
+                        (edge.data[0] == y + 1 and edge.data[1] == x + 1)):
+                    edge.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
+                    break
