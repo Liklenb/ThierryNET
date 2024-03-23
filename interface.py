@@ -162,6 +162,8 @@ class FletInterface:
             while x != self.current_path[1]:
                 if x not in self.current_path:
                     print(x)
+                    print(self.stack.controls[x])
+                    self.stack.controls[x].content.border = ft.border.all(5, color=ft.colors.PURPLE_200)
                 result = (x, None)
                 x = self.table_routage[x][self.current_path[1]]
                 result = (result[0], x)
