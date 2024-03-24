@@ -83,7 +83,7 @@ class FletInterface:
         """Crée un détecteur de geste pour un élément avec une couleur spécifiée."""
         return ft.GestureDetector(
             mouse_cursor=ft.MouseCursor.CLICK,
-            drag_interval=15,
+            drag_interval=25,
             on_vertical_drag_update=self._on_pan_update,
             on_tap=self._on_tap,
             left=x,
