@@ -55,7 +55,7 @@ class FletInterface:
         self.stack = ft.Stack(width=self.page.width,
                               height=self.page.height)
 
-        self.cp = cv.Canvas(content=self.stack,
+        self.cv = cv.Canvas(content=self.stack,
                             width=self.page.width + self.page.window_left,
                             height=self.page.height + self.page.window_top)
 
@@ -65,9 +65,11 @@ class FletInterface:
         del self.existing_positions
 
         for elt in self.graph.get_edges():
-            self._add_edge(elt.vertex1.identifier, elt.vertex2.identifier)
+            self._add_edge_and_weight(elt.vertex1.identifier, elt.vertex2.identifier, elt.weight)
 
-        self.page.controls = [self.cp]
+        del self.graph
+
+        self.page.controls = [self.cv]
 
     def _get_random_position(self):
         """Génère une position aléatoire valide pour un sommet."""
@@ -80,8 +82,8 @@ class FletInterface:
     def _create_gesture_detector(self, elt, color, x, y):
         """Crée un détecteur de geste pour un élément avec une couleur spécifiée."""
         return ft.GestureDetector(
-            mouse_cursor=ft.MouseCursor.MOVE,
-            drag_interval=10,
+            mouse_cursor=ft.MouseCursor.CLICK,
+            drag_interval=15,
             on_vertical_drag_update=self._on_pan_update,
             on_tap=self._on_tap,
             left=x,
@@ -101,7 +103,7 @@ class FletInterface:
         if not e.control.window_maximized:
             self._create_minimal_ui()
             if not self.graph_saved:
-                self.graph_saved = self.cp
+                self.graph_saved = self.cv
         else:
             if self.graph_saved:
                 self.page.controls = [self.graph_saved]
@@ -112,14 +114,16 @@ class FletInterface:
 
     def _on_pan_update(self, e: ft.DragUpdateEvent):
         """Gère la mise à jour de la position du détecteur de geste pendant le déplacement."""
+        self.page.mouse_cursor = ft.MouseCursor.MOVE
+
         max_left = self.stack.width - 70
         max_top = self.stack.height - 70
 
         e.control.top = max(0, min(max_top, e.control.top + e.delta_y))
         e.control.left = max(0, min(max_left, e.control.left + e.delta_x))
 
-        self._update_edges(int(e.control.content.content.value), e.control.left + 25, e.control.top + 25)
-        self.cp.update()
+        self._update_edges(int(e.control.content.content.value), e.control.left, e.control.top)
+        self.cv.update()
 
     def _add_vertex(self, elt):
         """Ajoute un sommet à l'interface utilisateur."""
@@ -130,22 +134,38 @@ class FletInterface:
 
     def _update_edges(self, src, x, y):
         """Met à jour les arêtes connectées à un sommet donné."""
-        for edge in self.cp.shapes:
-            if edge.data[0] == src:
-                edge.x1 = x
-                edge.y1 = y
-            elif edge.data[1] == src:
-                edge.x2 = x
-                edge.y2 = y
+        for edge in self.cv.shapes:
+            if type(edge) is cv.Text:
+                if edge.data[0] == src:
+                    edge.x = (x + self.stack.controls[edge.data[1]-1].left) / 2
+                    edge.y = (y + self.stack.controls[edge.data[1]-1].top) / 2
+                elif edge.data[1] == src:
+                    edge.x = (x + self.stack.controls[edge.data[0]-1].left) / 2
+                    edge.y = (y + self.stack.controls[edge.data[0]-1].top) / 2
+            else:
+                if edge.data[0] == src:
+                    edge.x1 = x + 25
+                    edge.y1 = y + 25
+                elif edge.data[1] == src:
+                    edge.x2 = x + 25
+                    edge.y2 = y + 25
 
-    def _add_edge(self, src, dest):
-        """Ajoute une arête entre les sommets source et destination."""
-        self.cp.shapes.append(cv.Line(
+    def _add_edge_and_weight(self, src, dest, weight):
+        """Ajoute une arête entre les sommets source et destination avec un poids donné."""
+        self.cv.shapes.append(cv.Line(
             x1=self.stack.controls[src].left + 25,
             y1=self.stack.controls[src].top + 25,
             x2=self.stack.controls[dest].left + 25,
             y2=self.stack.controls[dest].top + 25,
             paint=ft.Paint(color=ft.colors.WHITE, stroke_width=1),
+            data=(src + 1, dest + 1)
+        ))
+
+        self.cv.shapes.append(cv.Text(
+            x=(self.stack.controls[src].left + self.stack.controls[dest].left) / 2,
+            y=(self.stack.controls[src].top + self.stack.controls[dest].top) / 2,
+            text=str(weight),
+            alignment=ft.Alignment(0, 0),
             data=(src + 1, dest + 1)
         ))
 
@@ -164,7 +184,7 @@ class FletInterface:
             self._highlight_vertex(e.control.content, ft.colors.PINK_200)
             self._highlight_path()
 
-        self.cp.update()
+        self.cv.update()
 
     def _reset_ui(self):
         """Réinitialise l'UI en effaçant les sélections et en remettant les arêtes à leur état initial."""
@@ -172,7 +192,7 @@ class FletInterface:
             vertex.border = ft.border.all(0)
         self.colored_vertices = []
 
-        for edge in self.cp.shapes:
+        for edge in self.cv.shapes:
             edge.paint = ft.Paint(color=ft.colors.WHITE, stroke_width=1)
 
         self.current_path = (None, None)
@@ -196,7 +216,7 @@ class FletInterface:
             self.colored_edges.append(result)
 
         for x, y in self.colored_edges:
-            for edge in self.cp.shapes:
+            for edge in self.cv.shapes:
                 if ((edge.data[0] == x + 1 and edge.data[1] == y + 1) or
                         (edge.data[0] == y + 1 and edge.data[1] == x + 1)):
                     edge.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
