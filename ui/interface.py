@@ -104,7 +104,7 @@ class FletInterface:
             self.page_containers
         ]
 
-    def _load_file(self, e):
+    def _load_file(self, _):
         """Charge un graphe à partir d'un fichier."""
         if self.load_file_picker.result.files is None:
             return
