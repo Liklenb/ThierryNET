@@ -1,4 +1,4 @@
-import graph
+from core import graph
 import random
 
 

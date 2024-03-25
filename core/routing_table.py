@@ -1,5 +1,5 @@
-from graph_algorithms.pathfinding import pch
-from graph import Graph
+from core.path_finding import pch
+from core.graph import Graph
 
 
 def creer_table_routage(graph: Graph) -> list[list[None]]:

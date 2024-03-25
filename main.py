@@ -1,9 +1,9 @@
 import flet as ft
 
-from graph_algorithms.dfs import parcours_profondeur_rec
-from graph_algorithms.creation_graph import create_graph
-from graph_algorithms.tableroutage import creer_table_routage
-from interface import FletInterface
+from core.depth_first_search import parcours_profondeur_rec
+from core.graph_creation import create_graph
+from core.routing_table import creer_table_routage
+from ui.interface import FletInterface
 
 
 def main():
