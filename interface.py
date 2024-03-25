@@ -83,7 +83,7 @@ class FletInterface:
         """Crée un détecteur de geste pour un élément avec une couleur spécifiée."""
         return ft.GestureDetector(
             mouse_cursor=ft.MouseCursor.CLICK,
-            drag_interval=25,
+            drag_interval=30,
             on_vertical_drag_update=self._on_pan_update,
             on_tap=self._on_tap,
             left=x,
@@ -189,7 +189,7 @@ class FletInterface:
     def _reset_ui(self):
         """Réinitialise l'UI en effaçant les sélections et en remettant les arêtes à leur état initial."""
         for vertex in self.colored_vertices:
-            vertex.border = ft.border.all(0)
+            vertex.border = ft.border.all(0, color=ft.colors.TRANSPARENT)
         self.colored_vertices = []
 
         for edge in self.cv.shapes:
