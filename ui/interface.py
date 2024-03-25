@@ -37,7 +37,7 @@ class FletInterface:
 
     def _configure_page(self):
         """Configure les propriétés de la page."""
-        self.page.title = "Navigateur de Réseau : Simulateur de Tables de Routage"
+        self.page.title = "Navigateur de Réseau"
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.theme = ft.Theme(color_scheme_seed=ft.colors.PINK, use_material3=True)
         self.page.on_resize = self._page_resize
