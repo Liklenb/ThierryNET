@@ -1,6 +1,7 @@
 import flet as ft
 import flet.canvas as cv
 import random
+from core.routing_table import creer_table_routage
 
 
 def _get_color(elt):
@@ -52,7 +53,7 @@ class FletInterface:
     def _create_maximal_ui(self):
         """Crée l'interface utilisateur principale avec les sommets et les arêtes quand la fenêtre est maximisée."""
 
-        self.stack = ft.Stack(width=self.page.width,
+        self.stack = ft.Stack(width=self.page.width * 0.88,
                               height=self.page.height)
 
         self.cv = cv.Canvas(content=self.stack,
@@ -62,14 +63,60 @@ class FletInterface:
         for elt in self.graph.get_vertices():
             self._add_vertex(elt)
 
-        del self.existing_positions
-
         for elt in self.graph.get_edges():
             self._add_edge_and_weight(elt.vertex1.identifier, elt.vertex2.identifier, elt.weight)
 
-        del self.graph
+        self.save_file_picker = ft.FilePicker(on_result=lambda e: self.graph.save_to_file(e.path + ".thierry"), )
+        self.page.overlay.append(self.save_file_picker)
 
-        self.page.controls = [self.cv]
+        self.load_file_picker = ft.FilePicker(on_result=self._load_file)
+        self.page.overlay.append(self.load_file_picker)
+
+        self.page_containers = ft.Row([
+                ft.Column([
+                    ft.FilledButton(
+                        text="Sauvegarder",
+                        on_click=lambda _: self.save_file_picker.save_file(
+                            dialog_title="Sauvegarder le graphe",
+                            file_type=ft.FilePickerFileType.CUSTOM,
+                            allowed_extensions=["thierry"]
+                        )
+                    ),
+                    ft.FilledButton(
+                        text="Charger",
+                        on_click=lambda _: self.load_file_picker.pick_files(
+                            dialog_title="Charger le graphe",
+                            file_type=ft.FilePickerFileType.CUSTOM,
+                            allowed_extensions=["thierry"],
+                            allow_multiple=False
+                        )
+                    )],
+                    width=0.1 * self.page.width,
+                ),
+                ft.VerticalDivider(width=0.01 * self.page.width),
+                self.cv
+            ],
+                expand=True,
+                vertical_alignment=ft.CrossAxisAlignment.START
+            )
+
+        self.page.controls = [
+            self.page_containers
+        ]
+
+    def _load_file(self, e):
+        """Charge un graphe à partir d'un fichier."""
+        if self.load_file_picker.result.files is None:
+            return
+
+        self.graph = self.graph.load_file(self.load_file_picker.result.files[0].path)
+        self.table_routage = creer_table_routage(self.graph)
+        self.existing_positions = []
+        self.colored_vertices = []
+        self.colored_edges = []
+        self.current_path = (None, None)
+        self._create_maximal_ui()
+        self.page.update()
 
     def _get_random_position(self):
         """Génère une position aléatoire valide pour un sommet."""
@@ -103,10 +150,10 @@ class FletInterface:
         if not e.control.window_maximized:
             self._create_minimal_ui()
             if not self.graph_saved:
-                self.graph_saved = self.cv
+                self.graph_saved = self.page_containers
         else:
             if self.graph_saved:
-                self.page.controls = [self.graph_saved]
+                self.page.controls = [self.page_containers]
             else:
                 self._create_maximal_ui()
 
@@ -137,11 +184,11 @@ class FletInterface:
         for edge in self.cv.shapes:
             if type(edge) is cv.Text:
                 if edge.data[0] == src:
-                    edge.x = (x + self.stack.controls[edge.data[1]-1].left) / 2
-                    edge.y = (y + self.stack.controls[edge.data[1]-1].top) / 2
+                    edge.x = (x + self.stack.controls[edge.data[1] - 1].left) / 2
+                    edge.y = (y + self.stack.controls[edge.data[1] - 1].top) / 2
                 elif edge.data[1] == src:
-                    edge.x = (x + self.stack.controls[edge.data[0]-1].left) / 2
-                    edge.y = (y + self.stack.controls[edge.data[0]-1].top) / 2
+                    edge.x = (x + self.stack.controls[edge.data[0] - 1].left) / 2
+                    edge.y = (y + self.stack.controls[edge.data[0] - 1].top) / 2
             else:
                 if edge.data[0] == src:
                     edge.x1 = x + 25
