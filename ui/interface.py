@@ -1,40 +1,41 @@
 import flet as ft
 import flet.canvas as cv
 import random
-from core.routing_table import creer_table_routage
+from core.routing_table import create_routing_table
 
 
-def _get_color(elt):
+def get_element_color(element):
     """Retourne la couleur basée sur le niveau de l'élément."""
     return (
-        ft.colors.RED if elt.tier.value == 1 else
-        ft.colors.GREEN if elt.tier.value == 2 else
+        ft.colors.RED if element.tier.value == 1 else
+        ft.colors.GREEN if element.tier.value == 2 else
         ft.colors.BLUE
     )
 
 
-def _is_position_valid(x, y, existing_positions):
+def is_new_position_valid(new_x, new_y, existing_positions):
     """Vérifie si la nouvelle position est valide en considérant la distance minimale. """
     for pos_x, pos_y in existing_positions:
-        if abs(x - pos_x) < 60 and abs(y - pos_y) < 60:
+        if abs(new_x - pos_x) < 60 and abs(new_y - pos_y) < 60:
             return False
     return True
 
 
-class FletInterface:
-    def __init__(self, page, graph, table_routage):
+class FletGraphInterface:
+    def __init__(self, page, graph, routing_table):
         """Initialise l'interface utilisateur Flet avec une page et un graphe donnés."""
         self.page = page
         self.graph = graph
-        self.table_routage = table_routage
+        self.routing_table = routing_table
         self.existing_positions = []
         self.current_path = (None, None)
-        self.colored_vertices = []
-        self.colored_edges = []
+        self.highlighted_vertices = []
+        self.highlighted_edges = []
+        self.canvas_reference = {}
         self._configure_page()
         self._create_minimal_ui()
         self.page.update()
-        self.graph_saved = []
+        self.graph_state = []
 
     def _configure_page(self):
         """Configure les propriétés de la page."""
@@ -65,6 +66,7 @@ class FletInterface:
 
         for elt in self.graph.get_edges():
             self._add_edge_and_weight(elt.vertex1.identifier, elt.vertex2.identifier, elt.weight)
+            print(elt.vertex1.identifier, elt.vertex2.identifier, elt.weight)
 
         self.save_file_picker = ft.FilePicker(on_result=lambda e: self.graph.save_to_file(e.path + ".thierry"), )
         self.page.overlay.append(self.save_file_picker)
@@ -73,32 +75,32 @@ class FletInterface:
         self.page.overlay.append(self.load_file_picker)
 
         self.page_containers = ft.Row([
-                ft.Column([
-                    ft.FilledButton(
-                        text="Sauvegarder",
-                        on_click=lambda _: self.save_file_picker.save_file(
-                            dialog_title="Sauvegarder le graphe",
-                            file_type=ft.FilePickerFileType.CUSTOM,
-                            allowed_extensions=["thierry"]
-                        )
-                    ),
-                    ft.FilledButton(
-                        text="Charger",
-                        on_click=lambda _: self.load_file_picker.pick_files(
-                            dialog_title="Charger le graphe",
-                            file_type=ft.FilePickerFileType.CUSTOM,
-                            allowed_extensions=["thierry"],
-                            allow_multiple=False
-                        )
-                    )],
-                    width=0.1 * self.page.width,
+            ft.Column([
+                ft.FilledButton(
+                    text="Sauvegarder",
+                    on_click=lambda _: self.save_file_picker.save_file(
+                        dialog_title="Sauvegarder le graphe",
+                        file_type=ft.FilePickerFileType.CUSTOM,
+                        allowed_extensions=["thierry"]
+                    )
                 ),
-                ft.VerticalDivider(width=0.01 * self.page.width),
-                self.cv
-            ],
-                expand=True,
-                vertical_alignment=ft.CrossAxisAlignment.START
-            )
+                ft.FilledButton(
+                    text="Charger",
+                    on_click=lambda _: self.load_file_picker.pick_files(
+                        dialog_title="Charger le graphe",
+                        file_type=ft.FilePickerFileType.CUSTOM,
+                        allowed_extensions=["thierry"],
+                        allow_multiple=False
+                    )
+                )],
+                width=0.1 * self.page.width,
+            ),
+            ft.VerticalDivider(width=0.01 * self.page.width),
+            self.cv
+        ],
+            expand=True,
+            vertical_alignment=ft.CrossAxisAlignment.START
+        )
 
         self.page.controls = [
             self.page_containers
@@ -110,10 +112,10 @@ class FletInterface:
             return
 
         self.graph = self.graph.load_file(self.load_file_picker.result.files[0].path)
-        self.table_routage = creer_table_routage(self.graph)
+        self.table_routage = create_routing_table(self.graph)
         self.existing_positions = []
-        self.colored_vertices = []
-        self.colored_edges = []
+        self.highlighted_vertices = []
+        self.highlighted_edges = []
         self.current_path = (None, None)
         self._create_maximal_ui()
         self.page.update()
@@ -123,7 +125,7 @@ class FletInterface:
         while True:
             x = random.randint(0, int(self.stack.width) - 70)
             y = random.randint(0, int(self.stack.height) - 70)
-            if _is_position_valid(x, y, self.existing_positions):
+            if is_new_position_valid(x, y, self.existing_positions):
                 return x, y
 
     def _create_gesture_detector(self, elt, color, x, y):
@@ -149,10 +151,10 @@ class FletInterface:
         """Gère l'événement de redimensionnement de la page."""
         if not e.control.window_maximized:
             self._create_minimal_ui()
-            if not self.graph_saved:
-                self.graph_saved = self.page_containers
+            if not self.graph_state:
+                self.graph_state = self.page_containers
         else:
-            if self.graph_saved:
+            if self.graph_state:
                 self.page.controls = [self.page_containers]
             else:
                 self._create_maximal_ui()
@@ -169,64 +171,97 @@ class FletInterface:
         e.control.top = max(0, min(max_top, e.control.top + e.delta_y))
         e.control.left = max(0, min(max_left, e.control.left + e.delta_x))
 
-        self._update_edges(int(e.control.content.content.value), e.control.left, e.control.top)
+        self._update_edges(int(e.control.content.content.value) - 1, e.control.left, e.control.top)
         self.cv.update()
 
     def _add_vertex(self, elt):
         """Ajoute un sommet à l'interface utilisateur."""
-        color = _get_color(elt)
+        color = get_element_color(elt)
         x, y = self._get_random_position()
         self.stack.controls.append(self._create_gesture_detector(elt, color, x, y))
         self.existing_positions.append((x, y))
 
     def _update_edges(self, src, x, y):
         """Met à jour les arêtes connectées à un sommet donné."""
-        for edge in self.cv.shapes:
-            if type(edge) is cv.Text:
-                if edge.data[0] == src:
-                    edge.x = (x + self.stack.controls[edge.data[1] - 1].left) / 2
-                    edge.y = (y + self.stack.controls[edge.data[1] - 1].top) / 2
-                elif edge.data[1] == src:
-                    edge.x = (x + self.stack.controls[edge.data[0] - 1].left) / 2
-                    edge.y = (y + self.stack.controls[edge.data[0] - 1].top) / 2
-            else:
-                if edge.data[0] == src:
-                    edge.x1 = x + 25
-                    edge.y1 = y + 25
-                elif edge.data[1] == src:
-                    edge.x2 = x + 25
-                    edge.y2 = y + 25
+        # for edge in self.cv.shapes:
+        #     if type(edge) is cv.Text:
+        #         if edge.data[0] == src:
+        #             edge.x = (x + self.stack.controls[edge.data[1]].left) / 2
+        #             edge.y = (y + self.stack.controls[edge.data[1]].top) / 2
+        #         elif edge.data[1] == src:
+        #             edge.x = (x + self.stack.controls[edge.data[0]].left) / 2
+        #             edge.y = (y + self.stack.controls[edge.data[0]].top) / 2
+        #     else:
+        #         if edge.data[0] == src:
+        #             edge.x1 = x + 25
+        #             edge.y1 = y + 25
+        #         elif edge.data[1] == src:
+        #             edge.x2 = x + 25
+        #             edge.y2 = y + 25
+
+        for (source, destination), (line, text) in self.canvas_reference.items():
+            if source == src:
+                line.x1 = x + 25
+                line.y1 = y + 25
+                text.x = (x + self.stack.controls[destination].left) / 2
+                text.y = (y + self.stack.controls[destination].top) / 2
+            elif destination == src:
+                line.x2 = x + 25
+                line.y2 = y + 25
+                text.x = (x + self.stack.controls[source].left) / 2
+                text.y = (y + self.stack.controls[source].top) / 2
 
     def _add_edge_and_weight(self, src, dest, weight):
         """Ajoute une arête entre les sommets source et destination avec un poids donné."""
-        self.cv.shapes.append(cv.Line(
+
+        # self.cv.shapes.append(cv.Line(
+        #     x1=self.stack.controls[src].left + 25,
+        #     y1=self.stack.controls[src].top + 25,
+        #     x2=self.stack.controls[dest].left + 25,
+        #     y2=self.stack.controls[dest].top + 25,
+        #     paint=ft.Paint(color=ft.colors.WHITE, stroke_width=1),
+        #     data=(src, dest)
+        # ))
+        #
+        # self.cv.shapes.append(cv.Text(
+        #     x=(self.stack.controls[src].left + self.stack.controls[dest].left) / 2,
+        #     y=(self.stack.controls[src].top + self.stack.controls[dest].top) / 2,
+        #     text=str(weight),
+        #     alignment=ft.Alignment(0, 0),
+        #     data=(src, dest)
+        # ))
+
+        line = cv.Line(
             x1=self.stack.controls[src].left + 25,
             y1=self.stack.controls[src].top + 25,
             x2=self.stack.controls[dest].left + 25,
             y2=self.stack.controls[dest].top + 25,
             paint=ft.Paint(color=ft.colors.WHITE, stroke_width=1),
-            data=(src + 1, dest + 1)
-        ))
+            data=(src, dest)
+        )
+        self.cv.shapes.append(line)
 
-        self.cv.shapes.append(cv.Text(
+        text = cv.Text(
             x=(self.stack.controls[src].left + self.stack.controls[dest].left) / 2,
             y=(self.stack.controls[src].top + self.stack.controls[dest].top) / 2,
             text=str(weight),
             alignment=ft.Alignment(0, 0),
-            data=(src + 1, dest + 1)
-        ))
+            data=(src, dest)
+        )
+        self.cv.shapes.append(text)
+
+        self.canvas_reference[(src, dest)] = (line, text)
 
     def _on_tap(self, e: ft.TapEvent):
         """Gère l'événement de tap sur un sommet."""
         current_vertex_id = int(e.control.content.content.value) - 1
 
-        if len(self.colored_vertices) >= 2:
-            self._reset_ui()
-
-        if self.current_path[0] is None:
+        if self.current_path[0] is None or self.current_path[1] is not None:
+            if self.current_path[1] is not None:
+                self._reset_ui()
             self.current_path = (current_vertex_id, None)
             self._highlight_vertex(e.control.content, ft.colors.BLUE_200)
-        elif self.current_path[1] is None:
+        else:
             self.current_path = (self.current_path[0], current_vertex_id)
             self._highlight_vertex(e.control.content, ft.colors.PINK_200)
             self._highlight_path()
@@ -235,20 +270,20 @@ class FletInterface:
 
     def _reset_ui(self):
         """Réinitialise l'UI en effaçant les sélections et en remettant les arêtes à leur état initial."""
-        for vertex in self.colored_vertices:
+        for vertex in self.highlighted_vertices:
             vertex.border = ft.border.all(0, color=ft.colors.TRANSPARENT)
-        self.colored_vertices = []
+        self.highlighted_vertices = []
 
         for edge in self.cv.shapes:
             edge.paint = ft.Paint(color=ft.colors.WHITE, stroke_width=1)
 
         self.current_path = (None, None)
-        self.colored_edges = []
+        self.highlighted_edges = []
 
     def _highlight_vertex(self, vertex, color):
         """Met en évidence un sommet sélectionné."""
         vertex.border = ft.border.all(5, color=color)
-        self.colored_vertices.append(vertex)
+        self.highlighted_vertices.append(vertex)
 
     def _highlight_path(self):
         """Trouve et met en évidence le chemin entre deux sommets sélectionnés."""
@@ -256,15 +291,15 @@ class FletInterface:
         while x != self.current_path[1]:
             if x not in self.current_path:
                 self.stack.controls[x].content.border = ft.border.all(5, color=ft.colors.PURPLE_200)
-                self.colored_vertices.append(self.stack.controls[x].content)
+                self.highlighted_vertices.append(self.stack.controls[x].content)
             result = (x, None)
-            x = self.table_routage[x][self.current_path[1]]
+            x = self.routing_table[x][self.current_path[1]]
             result = (result[0], x)
-            self.colored_edges.append(result)
+            self.highlighted_edges.append(result)
 
-        for x, y in self.colored_edges:
+        for x, y in self.highlighted_edges:
             for edge in self.cv.shapes:
-                if ((edge.data[0] == x + 1 and edge.data[1] == y + 1) or
-                        (edge.data[0] == y + 1 and edge.data[1] == x + 1)):
+                if ((edge.data[0] == x and edge.data[1] == y) or
+                        (edge.data[0] == y and edge.data[1] == x)):
                     edge.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
                     break
