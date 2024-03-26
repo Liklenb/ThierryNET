@@ -39,7 +39,7 @@ class Vertex:
     def __init__(self, identifier: int, tier: Tiers):
         self.edges: list[Edge] = []
         self.identifier = identifier
-        self.tier = tier
+        self.tier: Tiers = tier
 
     def get_neighbours(self):
         """
@@ -125,8 +125,8 @@ class Graph:
         graph = Graph()
         with open(path, 'r') as file:
             lines = file.readlines()
-            for x in range(int(lines[0])):
-                graph.add_vertex(Tiers.TIER1)
+            for tier in lines[0].split():
+                graph.add_vertex(Tiers(int(tier)))
             for line in lines[1:]:
                 vertex1, vertex2, weight = line.split()
                 vertex1 = int(vertex1)
@@ -142,7 +142,7 @@ class Graph:
         :return: None
         """
         with open(path, 'w') as file:
-            file.write(str(len(self._vertices)) + '\n')
+            file.write(" ".join(str(vertex.tier.value) for vertex in self._vertices) + '\n')
             for edge in self._edges:
                 file.write(
                     str(self._vertices.index(edge.vertex1)) + ' ' + str(self._vertices.index(edge.vertex2)) + ' ' + str(
