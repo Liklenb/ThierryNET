@@ -31,7 +31,7 @@ class FletGraphInterface:
         self.current_path = (None, None)
         self.highlighted_vertices = []
         self.highlighted_edges = []
-        self.canvas_reference = {}
+        self.vertex_edges = {}
         self._configure_page()
         self._create_minimal_ui()
         self.page.update()
@@ -64,9 +64,15 @@ class FletGraphInterface:
         for elt in self.graph.get_vertices():
             self._add_vertex(elt)
 
+        vertex_count = set()
+
         for elt in self.graph.get_edges():
             self._add_edge_and_weight(elt.vertex1.identifier, elt.vertex2.identifier, elt.weight)
-            print(elt.vertex1.identifier, elt.vertex2.identifier, elt.weight)
+            if (elt.vertex1.identifier, elt.vertex2.identifier) in vertex_count:
+                print("WARNING: Duplicate edge detected between vertices {} and {}.".format(elt.vertex1.identifier,
+                                                                                            elt.vertex2.identifier))
+            else:
+                vertex_count.add((elt.vertex1.identifier, elt.vertex2.identifier))
 
         self.save_file_picker = ft.FilePicker(on_result=lambda e: self.graph.save_to_file(e.path + ".thierry"), )
         self.page.overlay.append(self.save_file_picker)
@@ -117,6 +123,7 @@ class FletGraphInterface:
         self.table_routage = create_routing_table(self.graph)
         self.existing_positions = []
         self.highlighted_vertices = []
+        self.vertex_edges = {}
         self.highlighted_edges = []
         self.current_path = (None, None)
         self._create_maximal_ui()
@@ -180,57 +187,24 @@ class FletGraphInterface:
         x, y = self._get_random_position()
         self.stack.controls.append(self._create_gesture_detector(elt, color, x, y))
         self.existing_positions.append((x, y))
+        self.vertex_edges[elt.identifier] = []
 
     def _update_edges(self, src, x, y):
         """Met à jour les arêtes connectées à un sommet donné."""
-        # for edge in self.cv.shapes:
-        #     if type(edge) is cv.Text:
-        #         if edge.data[0] == src:
-        #             edge.x = (x + self.stack.controls[edge.data[1]].left) / 2
-        #             edge.y = (y + self.stack.controls[edge.data[1]].top) / 2
-        #         elif edge.data[1] == src:
-        #             edge.x = (x + self.stack.controls[edge.data[0]].left) / 2
-        #             edge.y = (y + self.stack.controls[edge.data[0]].top) / 2
-        #     else:
-        #         if edge.data[0] == src:
-        #             edge.x1 = x + 25
-        #             edge.y1 = y + 25
-        #         elif edge.data[1] == src:
-        #             edge.x2 = x + 25
-        #             edge.y2 = y + 25
-
-        for (source, destination), (line, text) in self.canvas_reference.items():
-            if source == src:
+        for line, text in self.vertex_edges[src]:
+            if line.data[0] == src:
                 line.x1 = x + 25
                 line.y1 = y + 25
-                text.x = (x + self.stack.controls[destination].left) / 2
-                text.y = (y + self.stack.controls[destination].top) / 2
-            elif destination == src:
+                text.x = (x + self.stack.controls[line.data[1]].left) / 2
+                text.y = (y + self.stack.controls[line.data[1]].top) / 2
+            else:
                 line.x2 = x + 25
                 line.y2 = y + 25
-                text.x = (x + self.stack.controls[source].left) / 2
-                text.y = (y + self.stack.controls[source].top) / 2
+                text.x = (x + self.stack.controls[line.data[0]].left) / 2
+                text.y = (y + self.stack.controls[line.data[0]].top) / 2
 
     def _add_edge_and_weight(self, src, dest, weight):
         """Ajoute une arête entre les sommets source et destination avec un poids donné."""
-
-        # self.cv.shapes.append(cv.Line(
-        #     x1=self.stack.controls[src].left + 25,
-        #     y1=self.stack.controls[src].top + 25,
-        #     x2=self.stack.controls[dest].left + 25,
-        #     y2=self.stack.controls[dest].top + 25,
-        #     paint=ft.Paint(color=ft.colors.WHITE, stroke_width=1),
-        #     data=(src, dest)
-        # ))
-        #
-        # self.cv.shapes.append(cv.Text(
-        #     x=(self.stack.controls[src].left + self.stack.controls[dest].left) / 2,
-        #     y=(self.stack.controls[src].top + self.stack.controls[dest].top) / 2,
-        #     text=str(weight),
-        #     alignment=ft.Alignment(0, 0),
-        #     data=(src, dest)
-        # ))
-
         line = cv.Line(
             x1=self.stack.controls[src].left + 25,
             y1=self.stack.controls[src].top + 25,
@@ -250,20 +224,23 @@ class FletGraphInterface:
         )
         self.cv.shapes.append(text)
 
-        self.canvas_reference[(src, dest)] = (line, text)
+        self.vertex_edges[src].append((line, text))
+        self.vertex_edges[dest].append((line, text))
 
     def _on_tap(self, e: ft.TapEvent):
         """Gère l'événement de tap sur un sommet."""
         current_vertex_id = int(e.control.content.content.value) - 1
 
+        if self.current_path[0] == current_vertex_id:
+            return
+
         if self.current_path[0] is None or self.current_path[1] is not None:
-            if self.current_path[1] is not None:
-                self._reset_ui()
+            self._reset_ui()
             self.current_path = (current_vertex_id, None)
-            self._highlight_vertex(e.control.content, ft.colors.BLUE_200)
+            self._highlight_vertex(e.control.content, ft.colors.YELLOW_200)
         else:
             self.current_path = (self.current_path[0], current_vertex_id)
-            self._highlight_vertex(e.control.content, ft.colors.PINK_200)
+            self._highlight_vertex(e.control.content, ft.colors.ORANGE_200)
             self._highlight_path()
 
         self.cv.update()
