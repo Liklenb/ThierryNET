@@ -35,7 +35,7 @@ class FletGraphInterface:
         self._configure_page()
         self._create_minimal_ui()
         self.page.update()
-        self.graph_state = []
+        self.graph_state = False
 
     def _configure_page(self):
         """Configure les propriétés de la page."""
@@ -102,6 +102,8 @@ class FletGraphInterface:
             vertical_alignment=ft.CrossAxisAlignment.START
         )
 
+        self.graph_state = True
+
         self.page.controls = [
             self.page_containers
         ]
@@ -151,8 +153,6 @@ class FletGraphInterface:
         """Gère l'événement de redimensionnement de la page."""
         if not e.control.window_maximized:
             self._create_minimal_ui()
-            if not self.graph_state:
-                self.graph_state = self.page_containers
         else:
             if self.graph_state:
                 self.page.controls = [self.page_containers]
