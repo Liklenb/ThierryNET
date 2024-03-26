@@ -46,6 +46,7 @@ def create_graph():
             tiers2_1 = random.choice(possible)
             tiers2_2 = random.choice(possible)
         aretes['tiers2_tiers2'].append(graphique.add_edge(tiers2_1, tiers2_2, random.randint(10, 20)))
+        print(tiers2_1, tiers2_2, 'while')
         test = False
         test_priority = False  # variable permettant de savoir si au moins un sommet a 3 voisins
         for tiers2 in list_tiers2:
@@ -63,7 +64,7 @@ def create_graph():
                             and priority[0].identifier not in
                             (lambda lst: [voisin.vertex.identifier for voisin in lst])(priority[1].get_neighbours())):
                         aretes['tiers2_tiers2'].append(graphique.add_edge(priority[0], priority[1],
-                                                                          random.randint(10, 20)))
+                                                                        random.randint(10, 20)))
                     elif len(priority) == 1:
                         sommet = random.choice(possible)
                         while (sommet.identifier in
@@ -76,11 +77,12 @@ def create_graph():
                             possible.remove(sommet)
             if len(possible) == 1 and len(possible[0].get_neighbours()) < 2:
                 print('ah')
+
     # création des arêtes entre les tiers 1 et les tiers 2
     for tiers2 in list_tiers2:
         for _ in range(random.randint(1, 2)):
             tiers1 = random.choice(list_backbone)
-            while tiers1 in (lambda lst: [voisin.vertex.identifier for voisin in lst])(tiers2.get_neighbours()):
+            while tiers1.identifier in (lambda lst: [voisin.vertex.identifier for voisin in lst])(tiers2.get_neighbours()):
                 tiers1 = random.choice(list_backbone)
             aretes['tiers1_tiers2'].append(graphique.add_edge(tiers1, tiers2, random.randint(10, 20)))
 
@@ -88,7 +90,7 @@ def create_graph():
     for tiers3 in list_tiers3:
         for _ in range(2):
             tiers2 = random.choice(list_tiers2)
-            while tiers2 in (lambda lst: [voisin.vertex.identifier for voisin in lst])(tiers3.get_neighbours()):
+            while tiers2.identifier in (lambda lst: [voisin.vertex.identifier for voisin in lst])(tiers3.get_neighbours()):
                 tiers2 = random.choice(list_tiers2)
             aretes['tiers2_tiers3'].append(graphique.add_edge(tiers2, tiers3, random.randint(20, 50)))
     return graphique
