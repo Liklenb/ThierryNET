@@ -46,7 +46,6 @@ def create_graph():
             tiers2_1 = random.choice(possible)
             tiers2_2 = random.choice(possible)
         aretes['tiers2_tiers2'].append(graphique.add_edge(tiers2_1, tiers2_2, random.randint(10, 20)))
-        print(tiers2_1, tiers2_2, 'while')
         test = False
         test_priority = False  # variable permettant de savoir si au moins un sommet a 3 voisins
         for tiers2 in list_tiers2:
