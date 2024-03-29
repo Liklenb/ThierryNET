@@ -22,20 +22,15 @@ def is_new_position_valid(new_x, new_y, existing_positions):
 
 
 class FletGraphInterface:
-    def __init__(self, page, graph, routing_table):
+    def __init__(self, page, graph):
         """Initialise l'interface utilisateur Flet avec une page et un graphe donnés."""
         self.page = page
         self.graph = graph
-        self.routing_table = routing_table
-        self.existing_positions = []
-        self.current_path = (None, None)
-        self.highlighted_vertices = []
-        self.highlighted_edges = []
-        self.vertex_edges = {}
+        self.graph_state = False
+        self.current_path = (-1, -1)
         self._configure_page()
         self._create_minimal_ui()
         self.page.update()
-        self.graph_state = False
 
     def _configure_page(self):
         """Configure les propriétés de la page."""
@@ -54,6 +49,11 @@ class FletGraphInterface:
     def _create_maximal_ui(self):
         """Crée l'interface utilisateur principale avec les sommets et les arêtes quand la fenêtre est maximisée."""
 
+        self.highlighted_vertices = []
+        self.highlighted_edges = []
+        self.vertex_edges = {}
+        self.routing_table = create_routing_table(self.graph)
+
         self.stack = ft.Stack(width=self.page.width * 0.88,
                               height=self.page.height)
 
@@ -61,18 +61,12 @@ class FletGraphInterface:
                             width=self.page.width + self.page.window_left,
                             height=self.page.height + self.page.window_top)
 
+        existing_positions = []
         for elt in self.graph.get_vertices():
-            self._add_vertex(elt)
-
-        vertex_count = set()
+            self._add_vertex(elt, existing_positions)
 
         for elt in self.graph.get_edges():
             self._add_edge_and_weight(elt.vertex1.identifier, elt.vertex2.identifier, elt.weight)
-            if (elt.vertex1.identifier, elt.vertex2.identifier) in vertex_count:
-                print("WARNING: Duplicate edge detected between vertices {} and {}.".format(elt.vertex1.identifier,
-                                                                                            elt.vertex2.identifier))
-            else:
-                vertex_count.add((elt.vertex1.identifier, elt.vertex2.identifier))
 
         self.save_file_picker = ft.FilePicker(on_result=lambda e: self.graph.save_to_file(e.path + ".thierry"), )
         self.page.overlay.append(self.save_file_picker)
@@ -120,28 +114,22 @@ class FletGraphInterface:
             return
 
         self.graph = self.graph.load_file(self.load_file_picker.result.files[0].path)
-        self.table_routage = create_routing_table(self.graph)
-        self.existing_positions = []
-        self.highlighted_vertices = []
-        self.vertex_edges = {}
-        self.highlighted_edges = []
-        self.current_path = (None, None)
         self._create_maximal_ui()
         self.page.update()
 
-    def _get_random_position(self):
+    def _get_random_position(self, existing_positions):
         """Génère une position aléatoire valide pour un sommet."""
         while True:
             x = random.randint(0, int(self.stack.width) - 70)
             y = random.randint(0, int(self.stack.height) - 70)
-            if is_new_position_valid(x, y, self.existing_positions):
+            if is_new_position_valid(x, y, existing_positions):
                 return x, y
 
     def _create_gesture_detector(self, elt, color, x, y):
         """Crée un détecteur de geste pour un élément avec une couleur spécifiée."""
         return ft.GestureDetector(
             mouse_cursor=ft.MouseCursor.CLICK,
-            drag_interval=30,
+            drag_interval=40,
             on_vertical_drag_update=self._on_pan_update,
             on_tap=self._on_tap,
             left=x,
@@ -181,12 +169,12 @@ class FletGraphInterface:
         self._update_edges(int(e.control.content.content.value) - 1, e.control.left, e.control.top)
         self.cv.update()
 
-    def _add_vertex(self, elt):
+    def _add_vertex(self, elt, existing_positions):
         """Ajoute un sommet à l'interface utilisateur."""
         color = get_element_color(elt)
-        x, y = self._get_random_position()
+        x, y = self._get_random_position(existing_positions)
         self.stack.controls.append(self._create_gesture_detector(elt, color, x, y))
-        self.existing_positions.append((x, y))
+        existing_positions.append((x, y))
         self.vertex_edges[elt.identifier] = []
 
     def _update_edges(self, src, x, y):
@@ -275,8 +263,7 @@ class FletGraphInterface:
             self.highlighted_edges.append(result)
 
         for x, y in self.highlighted_edges:
-            for edge in self.cv.shapes:
-                if ((edge.data[0] == x and edge.data[1] == y) or
-                        (edge.data[0] == y and edge.data[1] == x)):
-                    edge.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
+            for line, _ in self.vertex_edges[x]:
+                if line.data[1] == y or line.data[0] == y:
+                    line.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
                     break
