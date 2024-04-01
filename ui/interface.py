@@ -76,23 +76,25 @@ class FletGraphInterface:
 
         self.page_containers = ft.Row([
             ft.Column([
-                ft.FilledButton(
+                ft.Row([ft.FilledButton(
                     text="Sauvegarder",
                     on_click=lambda _: self.save_file_picker.save_file(
                         dialog_title="Sauvegarder le graphe",
                         file_type=ft.FilePickerFileType.CUSTOM,
                         allowed_extensions=["thierry"]
-                    )
-                ),
-                ft.FilledButton(
+                    ),
+                    expand=True
+                )]),
+                ft.Row([ft.FilledButton(
                     text="Charger",
                     on_click=lambda _: self.load_file_picker.pick_files(
                         dialog_title="Charger le graphe",
                         file_type=ft.FilePickerFileType.CUSTOM,
                         allowed_extensions=["thierry"],
                         allow_multiple=False
-                    )
-                )],
+                    ),
+                    expand=True
+                )])],
                 width=0.1 * self.page.width,
             ),
             ft.VerticalDivider(width=0.01 * self.page.width),
