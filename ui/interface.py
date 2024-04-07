@@ -368,7 +368,6 @@ class FletGraphInterface:
             expand=False,
             spacing=1,
             padding=1,
-            auto_scroll=True,
             height=1000,
             width=3100,  # Set a fixed width for the ListView
             controls=[table],
