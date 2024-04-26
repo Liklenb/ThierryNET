@@ -32,12 +32,11 @@ def create_graph():
     # création des arêtes entre les tiers 1
     backbone = 0  # variable pour stocker le backbone maximum ayant déjà tenté de céer des liens avec tous les autres
     for backbone1 in list_backbone:
-        for backbone2 in list_backbone[backbone:len(list_backbone)]:
-            if backbone1 != backbone2 and backbone2 not in (lambda lst: [neighbourg.vertex for neighbourg in lst])(
-                    backbone1.get_neighbours()):
-                random_nb = random.randint(1, 4)
-                if random_nb != 4:
-                    edges['tiers1_tiers1'].append(graphic.add_edge(backbone1, backbone2, random.randint(5, 10)))
+        for backbone2 in list_backbone[backbone+1:len(list_backbone)]:  # on ne veut pas créer de lien avec lui-même
+            print(backbone1, backbone2)
+            random_nb = random.randint(1, 4)
+            if random_nb != 4:
+                edges['tiers1_tiers1'].append(graphic.add_edge(backbone1, backbone2, random.randint(5, 10)))
         backbone += 1
 
     # creation des arêtes entre les tiers 2
