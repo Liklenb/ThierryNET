@@ -86,21 +86,17 @@ Cette structure en points clarifie la fonction et l'objectif de chaque module au
 
 Le fichier `interface.py` exploite la bibliothèque Flet pour créer une interface graphique utilisateur permettant la visualisation et l'interaction avec des graphes.
 
-### Fonctions Utilitaires
+### Page d'accueil
 
-- **`get_element_color`** : Attribue une couleur aux éléments en fonction de leur niveau, améliorant la clarté visuelle de la structure du graphe.
-- **`is_new_position_valid`** : Assure que les nouveaux éléments sont positionnés à une distance appropriée les uns des autres pour éviter le chevauchement.
+L'application démarre sur une page d'accueil affichant un logo, accessible depuis `assets/logo.png`. Cette interface initiale inclut un bouton "Get started with new graph" qui, lorsqu'il est cliqué, génère un nouveau graphique de manière aléatoire. Les utilisateurs ont également la possibilité de charger un graphe préalablement sauvegardé.
 
-### Classe `FletGraphInterface`
+### Interaction avec le graphe
 
-- **Rôle** : Gère l'affichage et l'interaction avec le graphe dans l'interface utilisateur Flet.
-- **Fonctionnalités Principales** :
-  - **Configuration de la Page** : Définit le titre, l'alignement, et le thème de la page, et gère le redimensionnement de la fenêtre.
-  - **UI Minimale et Maximale** : Alterne entre une interface minimale et une interface complète en fonction de l'état de la fenêtre, permettant une visualisation optimisée du graphe.
-  - **Interactions** : Permet aux utilisateurs de sélectionner des sommets et de visualiser les chemins entre eux, avec des méthodes pour mettre en évidence et réinitialiser les sélections.
-
-Cette interface offre une plateforme intuitive pour explorer visuellement les graphes, rendant les structures de données et les algorithmes plus accessibles et compréhensibles.
-
+Les utilisateurs peuvent interagir avec le graphe de plusieurs manières :
+- **Génération d'un nouveau graphe :** Chaque clic sur "Get started with new graph" génère un nouveau graphe.
+- **Chargement et sauvegarde de graphes :** Les graphes peuvent être sauvegardés et chargés, permettant une reprise facile des sessions précédentes.
+- **Manipulation des nœuds :** Il est possible de déplacer les nœuds sur l'interface. Un clic sur un nœud permet d'afficher le chemin le plus court depuis ce nœud jusqu'à un autre.
+- **Sauvegarder le graphe :** Les utilisateurs peuvent sauvegarder l'état actuel du graphe pour une utilisation future.
 
 ## Génération de Graphes (`graph_creation.py`)
 
@@ -237,3 +233,25 @@ Les concepts de transit IP, backbone, niveaux d'opérateurs (Tier) et peering on
 Chaque module de notre architecture logicielle, de la création des graphes à la recherche de chemins, en passant par les tables de routage et l'interface utilisateur, a été une pièce cruciale du puzzle, s'imbriquant parfaitement pour former un système complet et fonctionnel. L'algorithme de Dijkstra, en particulier, a été notre boussole, guidant les paquets de données à travers le labyrinthe de notre réseau avec une précision et une efficacité remarquables.
 
 Alors que nous levons l'ancre de cette île d'innovation, nous emportons avec nous non seulement les connaissances et les compétences acquises, mais aussi les souvenirs d'une aventure partagée. Ce projet sera un phare, illuminant notre chemin vers de futurs défis et découvertes dans le vaste monde de l'informatique et des réseaux.
+
+## Installation
+
+Pour installer et exécuter l'application, suivez ces étapes :
+
+1. **Cloner le projet :**
+   ```bash
+   git clone https://github.com/Liklenb/ProjetIN403.git
+   ```
+2. **Accéder au répertoire du projet :**
+   ```bash
+    cd ProjetIN403
+    ```
+3. **Installer les dépendances :** Utilisez `pip` pour installer les dépendances nécessaires. Actuellement, le projet dépend principalement de la bibliothèque `flet`.
+   ```bash
+   pip install flet==0.21.2
+    ```
+4. **Exécuter le programme :** Lancez le programme en exécutant le fichier `main.py`.
+    ```bash
+    python main.py
+    ```
+   
