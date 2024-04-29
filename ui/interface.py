@@ -183,7 +183,8 @@ class FletGraphInterface:
             if is_new_position_valid(x, y, existing_positions):
                 return x, y
 
-    def _add_vertex(self, elt, existing_positions, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas], weight_text: ft.Ref[ft.Text]):
+    def _add_vertex(self, elt, existing_positions, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
+                    weight_text: ft.Ref[ft.Text]):
         """Ajoute un sommet à l'interface utilisateur."""
         color = get_element_color(elt)
         x, y = self._get_random_position(existing_positions, node)
@@ -191,7 +192,8 @@ class FletGraphInterface:
         existing_positions.append((x, y))
         self.vertex_edges[elt.identifier] = []
 
-    def _create_gesture_detector(self, elt, color, x, y, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas], weight_text: ft.Ref[ft.Text]):
+    def _create_gesture_detector(self, elt, color, x, y, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
+                                 weight_text: ft.Ref[ft.Text]):
         """Crée un détecteur de geste pour un élément avec une couleur spécifiée."""
         return ft.GestureDetector(
             mouse_cursor=ft.MouseCursor.CLICK,
