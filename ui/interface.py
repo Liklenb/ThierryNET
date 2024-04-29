@@ -33,8 +33,6 @@ class FletGraphInterface:
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.theme = ft.Theme(color_scheme_seed=ft.colors.PINK, use_material3=True)
         self.page.on_view_pop = self.view_pop
-        self.page.window_maximizable = False
-        self.page.window_resizable = False
         self.page.window_maximized = True
 
         load_picker = ft.Ref[ft.FilePicker]()
