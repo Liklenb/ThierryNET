@@ -74,24 +74,6 @@ class FletGraphInterface:
         self.load_file_picker = ft.FilePicker(on_result=self._load_file)
         self.page.overlay.append(self.load_file_picker)
 
-        self.routing_table_visible = False
-        self.routing_table_container = ft.Container(
-            content=self._create_table(),
-            visible=self.routing_table_visible,
-            width=0.4 * self.page.width,
-            height=0.6 * self.page.height,
-            alignment=ft.Alignment(0, 0),
-            border_radius=8,
-            padding=20,
-            bgcolor=ft.colors.BLACK,
-        )
-
-        self.toggle_button = ft.FilledButton(
-            text="Afficher la table de routage",
-            on_click=self._toggle_routing_table,
-            expand=True,
-        )
-
         self.page_containers = ft.Row([
             ft.Column([
                 ft.Row([ft.FilledButton(
@@ -112,14 +94,12 @@ class FletGraphInterface:
                         allow_multiple=False
                     ),
                     expand=True
-                )]),
-                ft.Row([self.toggle_button]),
+                )])
             ],
                 width=0.1 * self.page.width,
             ),
             ft.VerticalDivider(width=0.01 * self.page.width),
             self.cv,
-            self.routing_table_container,
         ],
             expand=True,
             vertical_alignment=ft.CrossAxisAlignment.START
@@ -289,106 +269,3 @@ class FletGraphInterface:
                 if line.data[1] == y or line.data[0] == y:
                     line.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
                     break
-
-    def _toggle_routing_table(self, _):
-        self.routing_table_visible = not self.routing_table_visible
-
-        if self.routing_table_visible:
-            self._show_routing_table()
-        else:
-            self._hide_routing_table(_)
-
-    def _show_routing_table(self):
-        self.routing_table_container = ft.Container(
-            content=self._create_table(),
-            width=0.8 * self.page.width,
-            height=0.8 * self.page.height,
-            alignment=ft.Alignment(0, 0),
-            border_radius=8,
-            padding=2,
-            bgcolor=ft.colors.BACKGROUND,
-        )
-
-        self.close_button = ft.IconButton(
-            icon=ft.icons.CLOSE,
-            on_click=self._hide_routing_table,
-        )
-
-        self.overlay_container = ft.Container(
-            content=ft.Column([
-                self.close_button,
-                self.routing_table_container,
-
-            ], alignment=ft.MainAxisAlignment.CENTER),
-            width=self.page.width,
-            height=self.page.height,
-            alignment=ft.alignment.center,
-            bgcolor=ft.colors.TRANSPARENT,
-        )
-
-        self.page.overlay.append(self.overlay_container)
-        self.page.update()
-
-    def _hide_routing_table(self, _):
-        if self.overlay_container in self.page.overlay:
-            self.page.overlay.remove(self.overlay_container)
-        self.page.update()
-
-    def _create_table(self):
-        """Affiche sous forme de tableau la table de routage."""
-        rows, cols = len(self.routing_table), len(self.routing_table[0])
-
-        def format_cell(cell):
-            return cell if cell is not None else "-"
-
-        table = ft.DataTable(
-            columns=[
-                ft.DataColumn(label=ft.Text(f"N-{i+1}", size=12, weight=ft.FontWeight.BOLD))
-                for i in range(cols)
-            ],
-            rows=[
-                ft.DataRow(
-                    cells=[
-                        ft.DataCell(ft.Text(str(format_cell(cell)), size=12))
-                        for cell in row
-                    ]
-                )
-                for row in self.routing_table
-            ],
-            data_row_min_height=10,
-            heading_row_height=20,
-            divider_thickness=1,
-            column_spacing=0,
-            data_row_max_height=20,
-            width=100000,  # Set a large width to accommodate all columns
-        )
-
-        # Create a ListView with a fixed height and width, and disable expanding
-        list_view = ft.ListView(
-            expand=False,
-            spacing=1,
-            padding=1,
-            height=1000,
-            width=3100,  # Set a fixed width for the ListView
-            controls=[table],
-        )
-
-        # Create a Row to enable horizontal scrolling
-        row = ft.Row(
-            controls=[list_view],
-            scroll=ft.ScrollMode.AUTO,
-            expand=True,
-        )
-
-        # Create a container with a fixed size
-        container = ft.Container(
-            content=row,
-            width=1400,  # Increase the width to accommodate all columns
-            height=800,
-            padding=1,
-            border=ft.border.all(2, "dark blue"),
-            border_radius=10,
-            alignment=ft.alignment.center,
-        )
-
-        return container
