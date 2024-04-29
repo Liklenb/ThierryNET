@@ -1,4 +1,8 @@
+
 # Tables de Routage - Projet Universitaire
+
+![Image du Projet](assets/preview.png)
+
 
 ## Membres de l'Équipe
 
