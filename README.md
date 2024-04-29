@@ -99,7 +99,7 @@ L'application démarre sur une page d'accueil affichant un logo, accessible depu
 Les utilisateurs peuvent interagir avec le graphe de plusieurs manières :
 - **Génération d'un nouveau graphe :** Chaque clic sur "Get started with new graph" génère un nouveau graphe.
 - **Chargement et sauvegarde de graphes :** Les graphes peuvent être sauvegardés et chargés, permettant une reprise facile des sessions précédentes.
-- **Manipulation des nœuds :** Il est possible de déplacer les nœuds sur l'interface. Un clic sur un nœud permet d'afficher le chemin le plus court depuis ce nœud jusqu'à un autre.
+- **Manipulation des nœuds :** Il est possible de déplacer les nœuds sur l'interface. Un clic sur un nœud permet d'afficher le chemin le plus court depuis ce nœud jusqu'à un autre avec son poids.
 - **Sauvegarder le graphe :** Les utilisateurs peuvent sauvegarder l'état actuel du graphe pour une utilisation future.
 
 ## Génération de Graphes (`graph_creation.py`)
