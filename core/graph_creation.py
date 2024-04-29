@@ -14,15 +14,15 @@ def create_graph():
     # création des 100 nœuds de la table de routage
 
     list_backbone = []  # liste qui stocke tous les éléments du tiers 1 (backbone)
-    for i in range(1, 11):
+    for i in range(10):
         list_backbone.append(graphic.add_vertex(graph.Tiers.TIER1))  # création des 10 nœuds du tiers 1
 
     list_tiers2 = []  # liste qui stocke tous les éléments du tiers 2
-    for i in range(11, 31):
+    for i in range(10, 30):
         list_tiers2.append(graphic.add_vertex(graph.Tiers.TIER2))  # création des 20 nœuds du tiers 2
 
     list_tiers3 = []  # liste qui stocke tous les éléments du tiers 3
-    for i in range(31, 101):
+    for i in range(30, 100):
         list_tiers3.append(graphic.add_vertex(graph.Tiers.TIER3))  # création des 70 nœuds du tiers 3
 
     # création des arêtes

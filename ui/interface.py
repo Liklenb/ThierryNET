@@ -269,7 +269,7 @@ class FletGraphInterface:
             return
 
         if self.current_path[0] is None or self.current_path[1] is not None:
-            self._reset_ui(canvas)
+            self._reset_ui(canvas, weight_text)
             self.current_path = (current_vertex_id, None)
             self._highlight_vertex(e.control.content, ft.colors.YELLOW_200)
         else:
@@ -280,7 +280,7 @@ class FletGraphInterface:
         canvas.current.update()
         weight_text.current.update()
 
-    def _reset_ui(self, canvas: ft.Ref[cv.Canvas]):
+    def _reset_ui(self, canvas: ft.Ref[cv.Canvas], weight_text: ft.Ref[ft.Text]):
         """Réinitialise l'UI en effaçant les sélections et en remettant les arêtes à leur état initial."""
         for vertex in self.highlighted_vertices:
             vertex.border = ft.border.all(0, color=ft.colors.TRANSPARENT)
@@ -291,6 +291,7 @@ class FletGraphInterface:
 
         self.current_path = (None, None)
         self.highlighted_edges = []
+        weight_text.current.value = ""
 
     def _highlight_vertex(self, vertex, color):
         """Met en évidence un sommet sélectionné."""
