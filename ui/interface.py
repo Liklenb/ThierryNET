@@ -134,7 +134,7 @@ class FletGraphInterface:
                               toolbar_height=self.page.height * 0.1,
                               actions=[
                                   ft.Container(
-                                      padding=ft.Padding(0, 0, 20, 0),
+                                      padding=ft.padding.only(right=20),
                                       content=ft.FilledButton(
                                           text="Save",
                                           icon=ft.icons.SAVE_ROUNDED,
