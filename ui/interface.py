@@ -38,7 +38,6 @@ class FletGraphInterface:
         load_picker = ft.Ref[ft.FilePicker]()
         self.page.overlay.append(ft.FilePicker(on_result=lambda e: self._load_file(e, load_picker), ref=load_picker))
 
-        self.graph = None
         self.highlighted_vertices = []
         self.highlighted_edges = []
         self.vertex_edges = {}
@@ -117,6 +116,7 @@ class FletGraphInterface:
         canvas = ft.Ref[cv.Canvas]()
         node = ft.Ref[ft.Stack]()
         save_picker = ft.Ref[ft.FilePicker]()
+        weight_text = ft.Ref[ft.Text]()
 
         if len(self.page.overlay) > 1:
             self.page.overlay.pop()
@@ -133,15 +133,21 @@ class FletGraphInterface:
                               actions=[
                                   ft.Container(
                                       padding=ft.padding.only(right=20),
-                                      content=ft.FilledButton(
-                                          text="Save",
-                                          icon=ft.icons.SAVE_ROUNDED,
-                                          on_click=lambda _: save_picker.current.save_file(
-                                              dialog_title="Sauvegarder le graphe",
-                                              file_type=ft.FilePickerFileType.CUSTOM,
-                                              allowed_extensions=["thierry"]
-                                          ),
-                                      ),
+                                      content=ft.Row(
+                                          [
+                                              ft.Text(ref=weight_text),
+                                              ft.FilledButton(
+                                                  text="Save",
+                                                  icon=ft.icons.SAVE_ROUNDED,
+                                                  on_click=lambda _: save_picker.current.save_file(
+                                                      dialog_title="Sauvegarder le graphe",
+                                                      file_type=ft.FilePickerFileType.CUSTOM,
+                                                      allowed_extensions=["thierry"]
+                                                  ),
+                                              )
+                                          ],
+                                          spacing=50
+                                      )
                                   )
                               ]),
 
@@ -161,7 +167,7 @@ class FletGraphInterface:
 
         existing_positions = []
         for elt in graph.get_vertices():
-            self._add_vertex(elt, existing_positions, node, canvas)
+            self._add_vertex(elt, existing_positions, node, canvas, weight_text)
 
         for elt in graph.get_edges():
             self._add_edge_and_weight(elt.vertex1.identifier, elt.vertex2.identifier, elt.weight, node, canvas)
@@ -177,21 +183,21 @@ class FletGraphInterface:
             if is_new_position_valid(x, y, existing_positions):
                 return x, y
 
-    def _add_vertex(self, elt, existing_positions, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas]):
+    def _add_vertex(self, elt, existing_positions, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas], weight_text: ft.Ref[ft.Text]):
         """Ajoute un sommet à l'interface utilisateur."""
         color = get_element_color(elt)
         x, y = self._get_random_position(existing_positions, node)
-        node.current.controls.append(self._create_gesture_detector(elt, color, x, y, node, canvas))
+        node.current.controls.append(self._create_gesture_detector(elt, color, x, y, node, canvas, weight_text))
         existing_positions.append((x, y))
         self.vertex_edges[elt.identifier] = []
 
-    def _create_gesture_detector(self, elt, color, x, y, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas]):
+    def _create_gesture_detector(self, elt, color, x, y, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas], weight_text: ft.Ref[ft.Text]):
         """Crée un détecteur de geste pour un élément avec une couleur spécifiée."""
         return ft.GestureDetector(
             mouse_cursor=ft.MouseCursor.CLICK,
             drag_interval=40,
             on_vertical_drag_update=lambda e: self._on_pan_update(e, node, canvas),
-            on_tap=lambda e: self._on_tap(e, node, canvas),
+            on_tap=lambda e: self._on_tap(e, node, canvas, weight_text),
             left=x,
             top=y,
             content=ft.Container(
@@ -255,7 +261,7 @@ class FletGraphInterface:
                 text.x = (x + node.current.controls[line.data[0]].left) / 2
                 text.y = (y + node.current.controls[line.data[0]].top) / 2
 
-    def _on_tap(self, e: ft.TapEvent, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas]):
+    def _on_tap(self, e: ft.TapEvent, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas], weight_text: ft.Ref[ft.Text]):
         """Gère l'événement de tap sur un sommet."""
         current_vertex_id = int(e.control.content.content.value) - 1
 
@@ -269,9 +275,10 @@ class FletGraphInterface:
         else:
             self.current_path = (self.current_path[0], current_vertex_id)
             self._highlight_vertex(e.control.content, ft.colors.ORANGE_200)
-            self._highlight_path(node)
+            self._highlight_path(node, weight_text)
 
         canvas.current.update()
+        weight_text.current.update()
 
     def _reset_ui(self, canvas: ft.Ref[cv.Canvas]):
         """Réinitialise l'UI en effaçant les sélections et en remettant les arêtes à leur état initial."""
@@ -290,15 +297,23 @@ class FletGraphInterface:
         vertex.border = ft.border.all(5, color=color)
         self.highlighted_vertices.append(vertex)
 
-    def _highlight_path(self, node: ft.Ref[ft.Stack]):
+    def _highlight_path(self, node: ft.Ref[ft.Stack], weight_text: ft.Ref[ft.Text]):
         """Trouve et met en évidence le chemin entre deux sommets sélectionnés."""
         x = self.current_path[0]
+        weight = 0
         while x != self.current_path[1]:
             if x not in self.current_path:
                 node.current.controls[x].content.border = ft.border.all(5, color=ft.colors.PURPLE_200)
                 self.highlighted_vertices.append(node.current.controls[x].content)
+
             result = (x, None)
             x = self.routing_table[x][self.current_path[1]]
+
+            for line, _ in self.vertex_edges[result[0]]:
+                if line.data[1] == x or line.data[0] == x:
+                    weight += int(_.text)
+                    break
+
             result = (result[0], x)
             self.highlighted_edges.append(result)
 
@@ -307,3 +322,5 @@ class FletGraphInterface:
                 if line.data[1] == y or line.data[0] == y:
                     line.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
                     break
+
+        weight_text.current.value = f"Weight: {weight}"
