@@ -155,81 +155,91 @@ class FletGraphInterface:
             ft.View(
                 "graph",
                 [
-                    ft.AppBar(title=ft.Text("Graph"),
-                              toolbar_height=self.page.height * 0.1,
-                              actions=[
-                                  ft.Container(
-                                      padding=ft.padding.only(right=20),
-                                      content=ft.Row(
-                                          [
-                                              ft.TextField(ref=input_node_1,
-                                                           label="Departure Node",
-                                                           input_filter=ft.InputFilter(regex_string=r"^([1-9]|[1-9]["
-                                                                                                    r"0-9]|100)$"),
-                                                           max_length=3,
-                                                           on_focus=lambda e: self._on_input_node(e,
-                                                                                                  node,
-                                                                                                  canvas,
-                                                                                                  weight_text,
-                                                                                                  input_node_1,
-                                                                                                  input_node_2,
-                                                                                                  way_text),
-                                                           on_blur=lambda e: self._on_input_node(e,
-                                                                                                 node,
-                                                                                                 canvas,
-                                                                                                 weight_text,
-                                                                                                 input_node_1,
-                                                                                                 input_node_2,
-                                                                                                 way_text),
-                                                           on_submit=lambda e: self._on_input_node(e,
-                                                                                                   node,
-                                                                                                   canvas,
-                                                                                                   weight_text,
-                                                                                                   input_node_1,
-                                                                                                   input_node_2,
-                                                                                                   way_text)),
-                                              ft.TextField(ref=input_node_2,
-                                                           label="Destination Node",
-                                                           input_filter=ft.InputFilter(regex_string=r"^([1-9]|[1-9]["
-                                                                                                    r"0-9]|100)$"),
-                                                           max_length=3,
-                                                           on_focus=lambda e: self._on_input_node(e,
-                                                                                                  node,
-                                                                                                  canvas,
-                                                                                                  weight_text,
-                                                                                                  input_node_1,
-                                                                                                  input_node_2,
-                                                                                                  way_text),
-                                                           on_blur=lambda e: self._on_input_node(e,
-                                                                                                 node,
-                                                                                                 canvas,
-                                                                                                 weight_text,
-                                                                                                 input_node_1,
-                                                                                                 input_node_2,
-                                                                                                 way_text),
-                                                           on_submit=lambda e: self._on_input_node(e,
-                                                                                                   node,
-                                                                                                   canvas,
-                                                                                                   weight_text,
-                                                                                                   input_node_1,
-                                                                                                   input_node_2,
-                                                                                                   way_text)),
-                                              ft.Text(ref=way_text),
-                                              ft.Text(ref=weight_text),
-                                              ft.FilledButton(
-                                                  text="Save",
-                                                  icon=ft.icons.SAVE_ROUNDED,
-                                                  on_click=lambda _: save_picker.current.save_file(
-                                                      dialog_title="Sauvegarder le graphe",
-                                                      file_type=ft.FilePickerFileType.CUSTOM,
-                                                      allowed_extensions=["thierry"]
-                                                  ),
-                                              )
-                                          ],
-                                          spacing=50
-                                      )
-                                  )
-                              ]),
+                    ft.AppBar(title=ft.Row(
+                        height=self.page.height * 0.1,
+                        spacing=20,
+                        controls=[
+                            ft.Text("Graph"),
+                            ft.TextField(
+                                border_radius=20,
+                                ref=input_node_1,
+                                label="Departure Node",
+                                input_filter=ft.InputFilter(regex_string=r"^([1-9]|[1-9]["
+                                                                         r"0-9]|100)$"),
+                                max_length=3,
+                                on_focus=lambda e: self._on_input_node(e,
+                                                                       node,
+                                                                       canvas,
+                                                                       weight_text,
+                                                                       input_node_1,
+                                                                       input_node_2,
+                                                                       way_text),
+                                on_blur=lambda e: self._on_input_node(e,
+                                                                      node,
+                                                                      canvas,
+                                                                      weight_text,
+                                                                      input_node_1,
+                                                                      input_node_2,
+                                                                      way_text),
+                                on_change=lambda e: self._on_input_node(e,
+                                                                        node,
+                                                                        canvas,
+                                                                        weight_text,
+                                                                        input_node_1,
+                                                                        input_node_2,
+                                                                        way_text)),
+                            ft.TextField(
+                                border_radius=20,
+                                ref=input_node_2,
+                                label="Destination Node",
+                                input_filter=ft.InputFilter(regex_string=r"^([1-9]|[1-9]["
+                                                                         r"0-9]|100)$"),
+                                max_length=3,
+                                on_focus=lambda e: self._on_input_node(e,
+                                                                       node,
+                                                                       canvas,
+                                                                       weight_text,
+                                                                       input_node_1,
+                                                                       input_node_2,
+                                                                       way_text),
+                                on_blur=lambda e: self._on_input_node(e,
+                                                                      node,
+                                                                      canvas,
+                                                                      weight_text,
+                                                                      input_node_1,
+                                                                      input_node_2,
+                                                                      way_text),
+                                on_change=lambda e: self._on_input_node(e,
+                                                                        node,
+                                                                        canvas,
+                                                                        weight_text,
+                                                                        input_node_1,
+                                                                        input_node_2,
+                                                                        way_text)),
+                            ft.Row(
+                                expand=True,
+                                controls=[
+                                    ft.Text(ref=way_text),
+                                    ft.Text(ref=weight_text),
+                                ]
+                            ),
+                        ],
+                    ),
+                        toolbar_height=self.page.height * 0.1,
+                        actions=[
+                            ft.Container(
+                                padding=ft.padding.only(right=20),
+                                content=ft.FilledButton(
+                                    text="Save",
+                                    icon=ft.icons.SAVE_ROUNDED,
+                                    on_click=lambda _: save_picker.current.save_file(
+                                        dialog_title="Sauvegarder le graphe",
+                                        file_type=ft.FilePickerFileType.CUSTOM,
+                                        allowed_extensions=["thierry"]
+                                    ),
+                                )
+                            )
+                        ]),
 
                     cv.Canvas(
                         content=ft.Stack(

@@ -238,7 +238,11 @@ Chaque module de notre architecture logicielle, de la création des graphes à l
 
 Alors que nous levons l'ancre de cette île d'innovation, nous emportons avec nous non seulement les connaissances et les compétences acquises, mais aussi les souvenirs d'une aventure partagée. Ce projet sera un phare, illuminant notre chemin vers de futurs défis et découvertes dans le vaste monde de l'informatique et des réseaux.
 
+
 ## Installation
+Téléchargez la dernière release [ici]()
+
+## Build
 
 Pour installer et exécuter l'application, suivez ces étapes :
 
@@ -254,7 +258,11 @@ Pour installer et exécuter l'application, suivez ces étapes :
    ```bash
    pip install flet==0.21.2
     ```
-4. **Exécuter le programme :** Lancez le programme en exécutant le fichier `main.py`.
+4. **Exécuter le script d'installation (pour linux uniquement) :** Exécutez le script `linux_install.sh`
+    ```bash
+   sudo ./linux_install.sh
+   ```
+5. **Exécuter le programme :** Lancez le programme en exécutant le fichier `main.py`.
     ```bash
     python main.py
     ```
