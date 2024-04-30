@@ -112,15 +112,15 @@ class FletGraphInterface:
 
     def _on_input_node(self, e: ft.ControlEvent, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
                        weight_text: ft.Ref[ft.Text], input_node_1: ft.Ref[ft.TextField],
-                       input_node_2: ft.Ref[ft.TextField]):
+                       input_node_2: ft.Ref[ft.TextField], way_text: ft.Ref[ft.Text]):
         """Gère l'événement de saisie de texte pour les sommets."""
         if None not in self.current_path:
-            self._reset_ui(canvas, weight_text)
+            self._reset_ui(canvas, weight_text, way_text)
         value_input_1 = int(input_node_1.current.value) - 1 if input_node_1.current.value != "" else None
         value_input_2 = int(input_node_2.current.value) - 1 if input_node_2.current.value != "" else None
         self.current_path = (value_input_1, value_input_2)
         if value_input_1 is None and value_input_2 is None:
-            self._reset_ui(canvas, weight_text)
+            self._reset_ui(canvas, weight_text, way_text)
         elif value_input_1 is not None and value_input_2 is None:
             self._highlight_vertex(node.current.controls[value_input_1].content, ft.colors.ORANGE_200)
         elif value_input_1 is None and value_input_2 is not None:
@@ -128,10 +128,11 @@ class FletGraphInterface:
         elif value_input_1 is not None and value_input_2 is not None:
             self._highlight_vertex(node.current.controls[value_input_1].content, ft.colors.ORANGE_200)
             self._highlight_vertex(node.current.controls[value_input_2].content, ft.colors.YELLOW_200)
-            self._highlight_path(node, weight_text)
+            self._highlight_path(node, weight_text, way_text)
 
         canvas.current.update()
         weight_text.current.update()
+        way_text.current.update()
 
     def _create_graph_ui(self, graph):
         self.routing_table = create_routing_table(graph)
@@ -140,6 +141,7 @@ class FletGraphInterface:
         node = ft.Ref[ft.Stack]()
         save_picker = ft.Ref[ft.FilePicker]()
         weight_text = ft.Ref[ft.Text]()
+        way_text = ft.Ref[ft.Text]()
         input_node_1 = ft.Ref[ft.TextField]()
         input_node_2 = ft.Ref[ft.TextField]()
 
@@ -161,7 +163,7 @@ class FletGraphInterface:
                                       content=ft.Row(
                                           [
                                               ft.TextField(ref=input_node_1,
-                                                           label="Node 1",
+                                                           label="Departure Node",
                                                            input_filter=ft.InputFilter(regex_string=r"^([1-9]|[1-9]["
                                                                                                     r"0-9]|100)$"),
                                                            max_length=3,
@@ -170,21 +172,24 @@ class FletGraphInterface:
                                                                                                   canvas,
                                                                                                   weight_text,
                                                                                                   input_node_1,
-                                                                                                  input_node_2),
+                                                                                                  input_node_2,
+                                                                                                  way_text),
                                                            on_blur=lambda e: self._on_input_node(e,
                                                                                                  node,
                                                                                                  canvas,
                                                                                                  weight_text,
                                                                                                  input_node_1,
-                                                                                                 input_node_2),
+                                                                                                 input_node_2,
+                                                                                                 way_text),
                                                            on_submit=lambda e: self._on_input_node(e,
                                                                                                    node,
                                                                                                    canvas,
                                                                                                    weight_text,
                                                                                                    input_node_1,
-                                                                                                   input_node_2)),
+                                                                                                   input_node_2,
+                                                                                                   way_text)),
                                               ft.TextField(ref=input_node_2,
-                                                           label="Node 2",
+                                                           label="Destination Node",
                                                            input_filter=ft.InputFilter(regex_string=r"^([1-9]|[1-9]["
                                                                                                     r"0-9]|100)$"),
                                                            max_length=3,
@@ -193,19 +198,23 @@ class FletGraphInterface:
                                                                                                   canvas,
                                                                                                   weight_text,
                                                                                                   input_node_1,
-                                                                                                  input_node_2),
+                                                                                                  input_node_2,
+                                                                                                  way_text),
                                                            on_blur=lambda e: self._on_input_node(e,
                                                                                                  node,
                                                                                                  canvas,
                                                                                                  weight_text,
                                                                                                  input_node_1,
-                                                                                                 input_node_2),
+                                                                                                 input_node_2,
+                                                                                                 way_text),
                                                            on_submit=lambda e: self._on_input_node(e,
                                                                                                    node,
                                                                                                    canvas,
                                                                                                    weight_text,
                                                                                                    input_node_1,
-                                                                                                   input_node_2)),
+                                                                                                   input_node_2,
+                                                                                                   way_text)),
+                                              ft.Text(ref=way_text),
                                               ft.Text(ref=weight_text),
                                               ft.FilledButton(
                                                   text="Save",
@@ -355,7 +364,7 @@ class FletGraphInterface:
             input_node_1.current.focus()
             input_node_2.current.focus()
 
-    def _reset_ui(self, canvas: ft.Ref[cv.Canvas], weight_text: ft.Ref[ft.Text]):
+    def _reset_ui(self, canvas: ft.Ref[cv.Canvas], weight_text: ft.Ref[ft.Text], way_text: ft.Ref[ft.Text]):
         """Réinitialise l'UI en effaçant les sélections et en remettant les arêtes à leur état initial."""
         for vertex in self.highlighted_vertices:
             vertex.border = ft.border.all(0, color=ft.colors.TRANSPARENT)
@@ -366,16 +375,20 @@ class FletGraphInterface:
 
         self.highlighted_edges = []
         weight_text.current.value = ""
+        weight_text.current.update()
+        way_text.current.value = ""
+        way_text.current.update()
 
     def _highlight_vertex(self, vertex, color):
         """Met en évidence un sommet sélectionné."""
         vertex.border = ft.border.all(5, color=color)
         self.highlighted_vertices.append(vertex)
 
-    def _highlight_path(self, node: ft.Ref[ft.Stack], weight_text: ft.Ref[ft.Text]):
+    def _highlight_path(self, node: ft.Ref[ft.Stack], weight_text: ft.Ref[ft.Text], way_text: ft.Ref[ft.Text]):
         """Trouve et met en évidence le chemin entre deux sommets sélectionnés."""
         x = self.current_path[0]
         weight = 0
+        way = [x+1]
         while x != self.current_path[1]:
             if x not in self.current_path:
                 node.current.controls[x].content.border = ft.border.all(5, color=ft.colors.PURPLE_200)
@@ -383,6 +396,7 @@ class FletGraphInterface:
 
             result = (x, None)
             x = self.routing_table[x][self.current_path[1]]
+            way.append(x+1)
 
             for line, _ in self.vertex_edges[result[0]]:
                 if line.data[1] == x or line.data[0] == x:
@@ -399,3 +413,5 @@ class FletGraphInterface:
                     break
 
         weight_text.current.value = f"Weight: {weight}"
+        weight_text.current.update()
+        way_text.current.value = f"Way: {" --> ".join(map(str, way))}"
