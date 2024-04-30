@@ -110,7 +110,7 @@ class FletGraphInterface:
         graph = Graph().load_file(picker.current.result.files[0].path)
         self._create_graph_ui(graph)
 
-    def _on_input_node(self, e: ft.ControlEvent, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
+    def _on_input_node(self, _, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
                        weight_text: ft.Ref[ft.Text], input_node_1: ft.Ref[ft.TextField],
                        input_node_2: ft.Ref[ft.TextField], way_text: ft.Ref[ft.Text]):
         """Gère l'événement de saisie de texte pour les sommets."""
@@ -354,7 +354,8 @@ class FletGraphInterface:
                 text.x = (x + node.current.controls[line.data[0]].left) / 2
                 text.y = (y + node.current.controls[line.data[0]].top) / 2
 
-    def _on_tap(self, e: ft.TapEvent, input_node_1: ft.Ref[ft.TextField], input_node_2: ft.Ref[ft.TextField]):
+    @staticmethod
+    def _on_tap(e: ft.TapEvent, input_node_1: ft.Ref[ft.TextField], input_node_2: ft.Ref[ft.TextField]):
         """Gère l'événement de tap sur un sommet."""
         current_vertex_id = int(e.control.content.content.value) - 1
 
