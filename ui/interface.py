@@ -415,3 +415,4 @@ class FletGraphInterface:
         weight_text.current.value = f"Weight: {weight}"
         weight_text.current.update()
         way_text.current.value = f"Way: {" --> ".join(map(str, way))}"
+        way_text.current.update()
