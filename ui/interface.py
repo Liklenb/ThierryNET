@@ -134,6 +134,14 @@ class FletGraphInterface:
         weight_text.current.update()
         way_text.current.update()
 
+    def _on_weight_visibility_change(self, _, check_visible_weight: ft.Ref[ft.Checkbox]):
+        """Gère le changement de visibilité des poids des arêtes."""
+        for vertex_edges_values in self.vertex_edges.values():
+            for i in range(len(vertex_edges_values)):
+                text = vertex_edges_values[i][1]
+                text.visible = check_visible_weight.current.value
+                text.update()
+
     def _create_graph_ui(self, graph):
         self.routing_table = create_routing_table(graph)
 
@@ -144,6 +152,7 @@ class FletGraphInterface:
         way_text = ft.Ref[ft.Text]()
         input_node_1 = ft.Ref[ft.TextField]()
         input_node_2 = ft.Ref[ft.TextField]()
+        check_visible_weight = ft.Ref[ft.Checkbox]()
 
         if len(self.page.overlay) > 1:
             self.page.overlay.pop()
@@ -221,6 +230,9 @@ class FletGraphInterface:
                                 controls=[
                                     ft.Text(ref=way_text),
                                     ft.Text(ref=weight_text),
+                                    ft.Checkbox(ref=check_visible_weight, label="Show weights on arcs", value=True,
+                                                on_change=lambda _:
+                                                self._on_weight_visibility_change(_, check_visible_weight))
                                 ]
                             ),
                         ],
@@ -303,7 +315,8 @@ class FletGraphInterface:
             )
         )
 
-    def _add_edge_and_weight(self, src, dest, weight, stack: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas]):
+    def _add_edge_and_weight(self, src, dest, weight, stack: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
+                             weight_visible=True):
         """Ajoute une arête entre les sommets source et destination avec un poids donné."""
         line = cv.Line(
             x1=stack.current.controls[src].left + 25,
@@ -320,7 +333,8 @@ class FletGraphInterface:
             y=(stack.current.controls[src].top + stack.current.controls[dest].top) / 2,
             text=str(weight),
             alignment=ft.Alignment(0, 0),
-            data=(src, dest)
+            data=(src, dest),
+            visible=weight_visible
         )
         canvas.current.shapes.append(text)
 
