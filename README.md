@@ -241,7 +241,7 @@ Alors que nous levons l'ancre de cette île d'innovation, nous emportons avec no
 
 
 ## Installation
-Téléchargez la dernière release [ici]()
+Téléchargez la dernière release [ici](https://github.com/Liklenb/ProjetIN403/releases/tag/v1.0.0)
 
 ## Build
 
