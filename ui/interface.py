@@ -319,7 +319,8 @@ class FletGraphInterface:
             left=x,
             top=y,
             content=ft.Container(shape=ft.BoxShape.CIRCLE,
-                                 content=ft.Tooltip(message=f"Element {elt.identifier + 1}",
+                                 content=ft.Tooltip(message=f"Element {elt.identifier + 1} \nTiers {elt.tier.value}",
+                                                    text_align=ft.TextAlign.CENTER,
                                                     wait_duration=50,
                                                     content=ft.Image(
                                                                     src=image,
