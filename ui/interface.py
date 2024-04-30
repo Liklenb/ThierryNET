@@ -201,14 +201,8 @@ class FletGraphInterface:
                                                                       weight_text,
                                                                       input_node_1,
                                                                       input_node_2,
-                                                                      way_text),
-                                on_change=lambda e: self._on_input_node(e,
-                                                                        node,
-                                                                        canvas,
-                                                                        weight_text,
-                                                                        input_node_1,
-                                                                        input_node_2,
-                                                                        way_text)),
+                                                                      way_text)),
+
                             ft.TextField(
                                 width=200,
                                 border_radius=20,
@@ -230,14 +224,7 @@ class FletGraphInterface:
                                                                       weight_text,
                                                                       input_node_1,
                                                                       input_node_2,
-                                                                      way_text),
-                                on_change=lambda e: self._on_input_node(e,
-                                                                        node,
-                                                                        canvas,
-                                                                        weight_text,
-                                                                        input_node_1,
-                                                                        input_node_2,
-                                                                        way_text)),
+                                                                      way_text)),
                             ft.Row(
                                 expand=True,
                                 controls=[
