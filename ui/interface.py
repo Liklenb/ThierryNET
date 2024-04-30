@@ -8,12 +8,12 @@ from core.graph_creation import create_graph
 from core.graph import Graph
 
 
-def get_element_color(element):
+def get_element_image(element):
     """Retourne la couleur basée sur le niveau de l'élément."""
     return (
-        ft.colors.RED if element.tier.value == 1 else
-        ft.colors.GREEN if element.tier.value == 2 else
-        ft.colors.BLUE
+        "images/serveur.png" if element.tier.value == 1 else
+        "images/routeur.png" if element.tier.value == 2 else
+        "images/pc.png"
     )
 
 
@@ -130,6 +130,17 @@ class FletGraphInterface:
             self._highlight_vertex(node.current.controls[value_input_2].content, ft.colors.YELLOW_200)
             self._highlight_path(node, weight_text, way_text)
 
+        if input_node_1.current.value != "":
+            input_node_1.current.width = 100
+        else:
+            input_node_1.current.width = 200
+        if input_node_2.current.value != "":
+            input_node_2.current.width = 100
+        else:
+            input_node_2.current.width = 200
+        input_node_1.current.update()
+        input_node_2.current.update()
+
         canvas.current.update()
         weight_text.current.update()
         way_text.current.update()
@@ -170,6 +181,7 @@ class FletGraphInterface:
                         controls=[
                             ft.Text("Graph"),
                             ft.TextField(
+                                width=200,
                                 border_radius=20,
                                 ref=input_node_1,
                                 label="Departure Node",
@@ -198,6 +210,7 @@ class FletGraphInterface:
                                                                         input_node_2,
                                                                         way_text)),
                             ft.TextField(
+                                width=200,
                                 border_radius=20,
                                 ref=input_node_2,
                                 label="Destination Node",
@@ -230,11 +243,11 @@ class FletGraphInterface:
                                 controls=[
                                     ft.Text(ref=way_text),
                                     ft.Text(ref=weight_text),
-                                    ft.Checkbox(ref=check_visible_weight, label="Show weights on arcs", value=True,
-                                                on_change=lambda _:
-                                                self._on_weight_visibility_change(_, check_visible_weight))
                                 ]
                             ),
+                            ft.Checkbox(ref=check_visible_weight, label="Show weights on arcs", value=True,
+                                        on_change=lambda _:
+                                        self._on_weight_visibility_change(_, check_visible_weight))
                         ],
                     ),
                         toolbar_height=self.page.height * 0.1,
@@ -288,14 +301,14 @@ class FletGraphInterface:
     def _add_vertex(self, elt, existing_positions, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
                     input_node_1: ft.Ref[ft.TextField], input_node_2: ft.Ref[ft.TextField]):
         """Ajoute un sommet à l'interface utilisateur."""
-        color = get_element_color(elt)
+        image = get_element_image(elt)
         x, y = self._get_random_position(existing_positions, node)
         node.current.controls.append(
-            self._create_gesture_detector(elt, color, x, y, node, canvas, input_node_1, input_node_2))
+            self._create_gesture_detector(elt, image, x, y, node, canvas, input_node_1, input_node_2))
         existing_positions.append((x, y))
         self.vertex_edges[elt.identifier] = []
 
-    def _create_gesture_detector(self, elt, color, x, y, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
+    def _create_gesture_detector(self, elt, image, x, y, node: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
                                  input_node_1: ft.Ref[ft.TextField], input_node_2: ft.Ref[ft.TextField]):
         """Crée un détecteur de geste pour un élément avec une couleur spécifiée."""
         return ft.GestureDetector(
@@ -305,15 +318,15 @@ class FletGraphInterface:
             on_tap=lambda e: self._on_tap(e, input_node_1, input_node_2),
             left=x,
             top=y,
-            content=ft.Container(
-                bgcolor=color,
-                width=50,
-                height=50,
-                border_radius=20,
-                content=ft.Text(str(elt.identifier + 1)),
-                alignment=ft.Alignment(0, 0)
-            )
-        )
+            content=ft.Container(shape=ft.BoxShape.CIRCLE,
+                                 content=ft.Tooltip(message=f"Element {elt.identifier + 1}",
+                                                    wait_duration=50,
+                                                    content=ft.Image(
+                                                                    src=image,
+                                                                    width=50,
+                                                                    height=50,
+                                                                    border_radius=20,
+                                                                    semantics_label=elt.identifier + 1))))
 
     def _add_edge_and_weight(self, src, dest, weight, stack: ft.Ref[ft.Stack], canvas: ft.Ref[cv.Canvas],
                              weight_visible=True):
@@ -351,7 +364,7 @@ class FletGraphInterface:
         e.control.top = max(0, min(max_top, e.control.top + e.delta_y))
         e.control.left = max(0, min(max_left, e.control.left + e.delta_x))
 
-        self._update_edges(int(e.control.content.content.value) - 1, e.control.left, e.control.top, node)
+        self._update_edges(int(e.control.content.content.content.semantics_label) - 1, e.control.left, e.control.top, node)
         canvas.current.update()
 
     def _update_edges(self, src, x, y, node: ft.Ref[ft.Stack]):
@@ -371,7 +384,7 @@ class FletGraphInterface:
     @staticmethod
     def _on_tap(e: ft.TapEvent, input_node_1: ft.Ref[ft.TextField], input_node_2: ft.Ref[ft.TextField]):
         """Gère l'événement de tap sur un sommet."""
-        current_vertex_id = int(e.control.content.content.value) - 1
+        current_vertex_id = int(e.control.content.content.content.semantics_label) - 1
 
         if input_node_1.current.value == "":
             input_node_1.current.value = str(current_vertex_id + 1)
