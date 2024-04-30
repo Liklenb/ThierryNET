@@ -241,7 +241,7 @@ Alors que nous levons l'ancre de cette île d'innovation, nous emportons avec no
 
 
 ## Installation
-Téléchargez la dernière release [ici](https://github.com/Liklenb/ProjetIN403/releases/tag/v1.0.0)
+Téléchargez la dernière release [ici](https://github.com/Liklenb/ThierryNET/releases)
 
 ## Build
 
@@ -249,11 +249,11 @@ Pour installer et exécuter l'application, suivez ces étapes :
 
 1. **Cloner le projet :**
    ```bash
-   git clone https://github.com/Liklenb/ProjetIN403.git
+   git clone https://github.com/Liklenb/ThierryNET.git
    ```
 2. **Accéder au répertoire du projet :**
    ```bash
-    cd ProjetIN403
+    cd ThierryNET
     ```
 3. **Installer les dépendances :** Utilisez `pip` pour installer les dépendances nécessaires. Actuellement, le projet dépend principalement de la bibliothèque `flet`.
    ```bash
