@@ -450,7 +450,7 @@ class FletGraphInterface:
                     line.paint = ft.Paint(color=ft.colors.RED, stroke_width=10)
                     break
 
-        weight_text.current.value = f"Weight: {weight}"
+        weight_text.current.value = f"Time: {weight} ms"
         weight_text.current.update()
         way_text.current.value = f"Way: {' --> '.join(map(str, way))}"
         way_text.current.update()
