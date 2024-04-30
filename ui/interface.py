@@ -11,9 +11,9 @@ from core.graph import Graph
 def get_element_image(element):
     """Retourne la couleur basée sur le niveau de l'élément."""
     return (
-        "images/serveur.png" if element.tier.value == 1 else
-        "images/routeur.png" if element.tier.value == 2 else
-        "images/pc.png"
+        "../assets/serveur.png" if element.tier.value == 1 else
+        "../assets/routeur.png" if element.tier.value == 2 else
+        "../assets/pc.png"
     )
 
 
