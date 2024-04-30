@@ -388,7 +388,7 @@ class FletGraphInterface:
         """Trouve et met en évidence le chemin entre deux sommets sélectionnés."""
         x = self.current_path[0]
         weight = 0
-        way = [x+1]
+        way = [x + 1]
         while x != self.current_path[1]:
             if x not in self.current_path:
                 node.current.controls[x].content.border = ft.border.all(5, color=ft.colors.PURPLE_200)
@@ -396,7 +396,7 @@ class FletGraphInterface:
 
             result = (x, None)
             x = self.routing_table[x][self.current_path[1]]
-            way.append(x+1)
+            way.append(x + 1)
 
             for line, _ in self.vertex_edges[result[0]]:
                 if line.data[1] == x or line.data[0] == x:
@@ -414,5 +414,5 @@ class FletGraphInterface:
 
         weight_text.current.value = f"Weight: {weight}"
         weight_text.current.update()
-        way_text.current.value = f"Way: {" --> ".join(map(str, way))}"
+        way_text.current.value = f"Way: {' --> '.join(map(str, way))}"
         way_text.current.update()
